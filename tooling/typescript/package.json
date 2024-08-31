@@ -1,0 +1,7 @@
+{
+  "name": "@parody/tsconfig",
+  "private": true,
+  "files": [
+    "*.json"
+  ]
+}

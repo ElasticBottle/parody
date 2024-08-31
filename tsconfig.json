@@ -1,0 +1,3 @@
+{
+  "extends": "@parody/typescript/base.json"
+}

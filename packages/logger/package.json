@@ -1,0 +1,23 @@
+{
+  "name": "@parody/logger",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc",
+    "clean": "rm -rf .turbo node_modules",
+    "format": "bunx @biomejs/biome format .",
+    "lint": "bunx @biomejs/biome lint .",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "pino": "^9.3.2"
+  }
+}
