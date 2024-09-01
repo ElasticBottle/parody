@@ -3,7 +3,12 @@
   "organizeImports": { "enabled": true },
   "linter": {
     "enabled": true,
-    "rules": { "recommended": true }
+    "rules": {
+      "recommended": true,
+      "nursery": {
+        "useSortedClasses": "warn"
+      }
+    }
   },
   "vcs": {
     "enabled": true,
@@ -44,5 +49,8 @@
         }
       }
     }
-  ]
+  ],
+  "files": {
+    "ignore": ["node_modules", ".turbo", ".cache", "dist", "routeTree.gen.ts"]
+  }
 }

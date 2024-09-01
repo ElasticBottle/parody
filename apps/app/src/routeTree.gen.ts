@@ -13,23 +13,35 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as ProductImport } from './routes/product'
+import { Route as ProductPhotoImport } from './routes/product.photo'
+import { Route as ProductNameImport } from './routes/product.name'
 
 // Create Virtual Routes
 
-const AboutLazyImport = createFileRoute('/about')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
 
-const AboutLazyRoute = AboutLazyImport.update({
-  path: '/about',
+const ProductRoute = ProductImport.update({
+  path: '/product',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
+} as any)
 
 const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const ProductPhotoRoute = ProductPhotoImport.update({
+  path: '/photo',
+  getParentRoute: () => ProductRoute,
+} as any)
+
+const ProductNameRoute = ProductNameImport.update({
+  path: '/name',
+  getParentRoute: () => ProductRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -42,12 +54,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutLazyImport
+    '/product': {
+      id: '/product'
+      path: '/product'
+      fullPath: '/product'
+      preLoaderRoute: typeof ProductImport
       parentRoute: typeof rootRoute
+    }
+    '/product/name': {
+      id: '/product/name'
+      path: '/name'
+      fullPath: '/product/name'
+      preLoaderRoute: typeof ProductNameImport
+      parentRoute: typeof ProductImport
+    }
+    '/product/photo': {
+      id: '/product/photo'
+      path: '/photo'
+      fullPath: '/product/photo'
+      preLoaderRoute: typeof ProductPhotoImport
+      parentRoute: typeof ProductImport
     }
   }
 }
@@ -56,7 +82,10 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexLazyRoute,
-  AboutLazyRoute,
+  ProductRoute: ProductRoute.addChildren({
+    ProductNameRoute,
+    ProductPhotoRoute,
+  }),
 })
 
 /* prettier-ignore-end */
@@ -68,14 +97,26 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about"
+        "/product"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
-    "/about": {
-      "filePath": "about.lazy.tsx"
+    "/product": {
+      "filePath": "product.tsx",
+      "children": [
+        "/product/name",
+        "/product/photo"
+      ]
+    },
+    "/product/name": {
+      "filePath": "product.name.tsx",
+      "parent": "/product"
+    },
+    "/product/photo": {
+      "filePath": "product.photo.tsx",
+      "parent": "/product"
     }
   }
 }
