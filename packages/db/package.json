@@ -39,7 +39,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@parody/tsconfig": "workspace:*",
     "drizzle-kit": "^0.24.2",
     "typescript": "^5.5.4"
   }

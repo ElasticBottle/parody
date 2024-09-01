@@ -1,5 +1,5 @@
 {
-  "name": "@parody/tsconfig",
+  "name": "@parody/typescript",
   "private": true,
   "files": [
     "*.json"
