@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc",
-    "clean": "rm -rf .turbo node_modules",
+    "clean": "rm -rf .turbo node_modules .cache",
     "format": "bunx @biomejs/biome format .",
     "lint": "bunx @biomejs/biome lint .",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
