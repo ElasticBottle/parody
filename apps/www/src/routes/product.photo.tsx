@@ -1,8 +1,8 @@
 import { Button } from "@parody/ui/button";
-import { Input } from "@parody/ui/input";
 import { Label } from "@parody/ui/label";
 import { Link, createFileRoute, useRouter } from "@tanstack/react-router";
 import PlaceholderSvg from "~/assets/placeholder.svg";
+import { FileUpload } from "~/components/file-upload";
 
 export const Route = createFileRoute("/product/photo")({
 	component: ProductPhoto,
@@ -22,11 +22,8 @@ export function ProductPhoto() {
 						Please upload a photos of your product from various angles for the
 						best results.
 					</p>
-					<Input id="photo" type="file" className="mt-3" />
+					<FileUpload />
 				</div>
-				<Button type="submit" className="w-full">
-					Upload
-				</Button>
 			</div>
 			<div className="grid gap-4">
 				<div>
