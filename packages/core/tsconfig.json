@@ -1,5 +1,10 @@
 {
   "extends": "@parody/typescript/tsconfig.internal-package.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "target": "ES2022",
+    "module": "ESNext"
+  },
   "include": ["."],
   "exclude": ["node_modules", "dist"]
 }

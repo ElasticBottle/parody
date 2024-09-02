@@ -167,6 +167,8 @@ const FormMessage = React.forwardRef<
 });
 FormMessage.displayName = "FormMessage";
 
+export * from "@hookform/resolvers/zod";
+export type { UseFormReturn } from "react-hook-form";
 export {
 	useForm,
 	useFormField,
