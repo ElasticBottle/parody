@@ -14,8 +14,13 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as ProductImport } from './routes/product'
+import { Route as LoginImport } from './routes/login'
+import { Route as DashboardImport } from './routes/dashboard'
 import { Route as ProductPhotoImport } from './routes/product.photo'
 import { Route as ProductNameImport } from './routes/product.name'
+import { Route as DashboardProductImport } from './routes/dashboard/product'
+import { Route as DashboardProductIndexImport } from './routes/dashboard/product.index'
+import { Route as DashboardProductProductIdImport } from './routes/dashboard/product.$productId'
 
 // Create Virtual Routes
 
@@ -25,6 +30,16 @@ const IndexLazyImport = createFileRoute('/')()
 
 const ProductRoute = ProductImport.update({
   path: '/product',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LoginRoute = LoginImport.update({
+  path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DashboardRoute = DashboardImport.update({
+  path: '/dashboard',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -43,6 +58,21 @@ const ProductNameRoute = ProductNameImport.update({
   getParentRoute: () => ProductRoute,
 } as any)
 
+const DashboardProductRoute = DashboardProductImport.update({
+  path: '/product',
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardProductIndexRoute = DashboardProductIndexImport.update({
+  path: '/',
+  getParentRoute: () => DashboardProductRoute,
+} as any)
+
+const DashboardProductProductIdRoute = DashboardProductProductIdImport.update({
+  path: '/$productId',
+  getParentRoute: () => DashboardProductRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -54,12 +84,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardImport
+      parentRoute: typeof rootRoute
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginImport
+      parentRoute: typeof rootRoute
+    }
     '/product': {
       id: '/product'
       path: '/product'
       fullPath: '/product'
       preLoaderRoute: typeof ProductImport
       parentRoute: typeof rootRoute
+    }
+    '/dashboard/product': {
+      id: '/dashboard/product'
+      path: '/product'
+      fullPath: '/dashboard/product'
+      preLoaderRoute: typeof DashboardProductImport
+      parentRoute: typeof DashboardImport
     }
     '/product/name': {
       id: '/product/name'
@@ -75,6 +126,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductPhotoImport
       parentRoute: typeof ProductImport
     }
+    '/dashboard/product/$productId': {
+      id: '/dashboard/product/$productId'
+      path: '/$productId'
+      fullPath: '/dashboard/product/$productId'
+      preLoaderRoute: typeof DashboardProductProductIdImport
+      parentRoute: typeof DashboardProductImport
+    }
+    '/dashboard/product/': {
+      id: '/dashboard/product/'
+      path: '/'
+      fullPath: '/dashboard/product/'
+      preLoaderRoute: typeof DashboardProductIndexImport
+      parentRoute: typeof DashboardProductImport
+    }
   }
 }
 
@@ -82,6 +147,13 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexLazyRoute,
+  DashboardRoute: DashboardRoute.addChildren({
+    DashboardProductRoute: DashboardProductRoute.addChildren({
+      DashboardProductProductIdRoute,
+      DashboardProductIndexRoute,
+    }),
+  }),
+  LoginRoute,
   ProductRoute: ProductRoute.addChildren({
     ProductNameRoute,
     ProductPhotoRoute,
@@ -97,17 +169,36 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/dashboard",
+        "/login",
         "/product"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
+    "/dashboard": {
+      "filePath": "dashboard.tsx",
+      "children": [
+        "/dashboard/product"
+      ]
+    },
+    "/login": {
+      "filePath": "login.tsx"
+    },
     "/product": {
       "filePath": "product.tsx",
       "children": [
         "/product/name",
         "/product/photo"
+      ]
+    },
+    "/dashboard/product": {
+      "filePath": "dashboard/product.tsx",
+      "parent": "/dashboard",
+      "children": [
+        "/dashboard/product/$productId",
+        "/dashboard/product/"
       ]
     },
     "/product/name": {
@@ -117,6 +208,14 @@ export const routeTree = rootRoute.addChildren({
     "/product/photo": {
       "filePath": "product.photo.tsx",
       "parent": "/product"
+    },
+    "/dashboard/product/$productId": {
+      "filePath": "dashboard/product.$productId.tsx",
+      "parent": "/dashboard/product"
+    },
+    "/dashboard/product/": {
+      "filePath": "dashboard/product.index.tsx",
+      "parent": "/dashboard/product"
     }
   }
 }

@@ -11,7 +11,7 @@ export function ProductName() {
 	const router = useRouter();
 
 	return (
-		<div className="flex h-full w-full max-w-4xl flex-col items-center gap-5 py-5">
+		<div className="mx-auto flex h-full w-full max-w-4xl flex-col items-center gap-5 py-5">
 			<div className="flex w-full flex-col gap-1">
 				<Label htmlFor="email" className="font-bold text-4xl">
 					Product Name

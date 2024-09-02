@@ -2,6 +2,7 @@ import { Button } from "@parody/ui/button";
 import { Input } from "@parody/ui/input";
 import { Label } from "@parody/ui/label";
 import { Link, createFileRoute, useRouter } from "@tanstack/react-router";
+import PlaceholderSvg from "~/assets/placeholder.svg";
 
 export const Route = createFileRoute("/product/photo")({
 	component: ProductPhoto,
@@ -37,7 +38,7 @@ export function ProductPhoto() {
 				<div className="grid grid-cols-2 gap-4">
 					<div>
 						<img
-							src="/placeholder.svg"
+							src={PlaceholderSvg}
 							width={300}
 							height={200}
 							alt="Acceptable"
@@ -47,7 +48,7 @@ export function ProductPhoto() {
 					</div>
 					<div>
 						<img
-							src="/placeholder.svg"
+							src={PlaceholderSvg}
 							width={300}
 							height={200}
 							alt="Unacceptable"
@@ -57,7 +58,7 @@ export function ProductPhoto() {
 					</div>
 					<div>
 						<img
-							src="/placeholder.svg"
+							src={PlaceholderSvg}
 							width={300}
 							height={200}
 							alt="Acceptable"
@@ -67,7 +68,7 @@ export function ProductPhoto() {
 					</div>
 					<div>
 						<img
-							src="/placeholder.svg"
+							src={PlaceholderSvg}
 							width={300}
 							height={200}
 							alt="Unacceptable"
