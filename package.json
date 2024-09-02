@@ -4,29 +4,32 @@
   "workspaces": [
     "packages/*",
     "apps/*",
+    "infra/*",
     "tooling/*"
   ],
   "scripts": {
     "build": "turbo build",
-    "clean": "git clean -xdf node_modules",
+    "clean": "git clean -xdf node_modules .turbo .sst",
     "clean:workspaces": "turbo clean",
-    "dev": "turbo dev --parallel",
-    "dev:web": "turbo dev --filter=@parody/web",
-    "dev:app": "turbo dev --filter=@parody/app",
+    "dev": "bun with-env sst dev --verbose",
+    "dev:packages": "turbo dev --parallel",
     "env:add": "dotenvx set -f ./.env --",
     "env:get": "dotenvx get -f ./.env --",
-    "format": "turbo run format --continue",
-    "format:fix": "turbo run format --continue -- --write",
+    "format": "turbo run format --continue -- --write",
     "lint": "turbo run lint --continue -- --write",
     "lint:fix": "turbo run lint --continue -- --write --unsafe",
     "lint:ws": "bunx sherif@latest",
     "postinstall": "bun lint:ws",
-    "typecheck": "turbo typecheck"
+    "sso": "aws sso login --sso-session=parody",
+    "typecheck": "turbo typecheck",
+    "with-env": "dotenvx run -f ./.env --"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
     "@dotenvx/dotenvx": "^1.12.1",
     "@t3-oss/env-nextjs": "^0.11.1",
+    "@types/aws-lambda": "8.10.145",
+    "sst": "^3.0.93",
     "turbo": "2.1.1",
     "typescript": "^5.5.4"
   },

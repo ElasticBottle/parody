@@ -1,0 +1,23 @@
+{
+  "name": "@parody/api",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules dist .cache .wrangler",
+    "dev": "bun with-env && wrangler dev src/index.ts",
+    "deploy": "bun with-env && wrangler deploy --minify src/index.ts",
+    "format": "bunx @biomejs/biome format .",
+    "lint": "bunx @biomejs/biome lint .",
+    "with-env": "dotenvx decrypt -f ../../.env --stdout > .dev.vars"
+  },
+  "dependencies": {
+    "hono": "^4.5.10"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240529.0",
+    "wrangler": "^3.57.2"
+  }
+}

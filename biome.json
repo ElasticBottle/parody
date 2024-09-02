@@ -51,6 +51,14 @@
     }
   ],
   "files": {
-    "ignore": ["node_modules", ".turbo", ".cache", "dist", "routeTree.gen.ts"]
+    "ignore": [
+      "node_modules",
+      ".sst",
+      ".turbo",
+      ".cache",
+      "dist",
+      "routeTree.gen.ts",
+      "sst-env.d.ts"
+    ]
   }
 }

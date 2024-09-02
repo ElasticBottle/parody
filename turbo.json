@@ -41,7 +41,7 @@
     },
     "dev": {
       "inputs": ["$TURBO_DEFAULT$", ".env"],
-      "persistent": true,
+      "persistent": false,
       "cache": false
     },
     "jobs": {

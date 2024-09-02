@@ -4,6 +4,9 @@
 node_modules
 .pnp
 .pnp.js
+.wrangler
+dist-ssr
+*.local
 
 # testing
 coverage
@@ -21,18 +24,35 @@ build
 dist/
 .cache/
 
+# dev
+.yarn/
+!.yarn/releases
+.idea/workspace.xml
+.idea/usage.statistics.xml
+.idea/shelf
+
+
 # misc
 .DS_Store
 *.pem
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # debug
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # local env files
 .env.keys
+.dev.vars
 
 # vercel
 .vercel
@@ -56,3 +76,6 @@ tailwind.css
 # Supabase
 .branches
 .temp
+
+# sst
+.sst

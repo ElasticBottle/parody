@@ -1,15 +1,16 @@
 {
-  "name": "@parody/app",
+  "name": "@parody/www",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "build": "tsc -b && vite build",
-    "dev": "vite",
+    "dev": "bun with-env vite",
     "format": "bunx @biomejs/biome format .",
     "lint": "bunx @biomejs/biome lint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "with-env": "dotenvx run -f ../../.env -- "
   },
   "dependencies": {
     "@parody/ui": "workspace:*",
