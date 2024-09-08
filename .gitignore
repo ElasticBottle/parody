@@ -7,6 +7,8 @@ node_modules
 .wrangler
 dist-ssr
 *.local
+.venv
+__pycache__
 
 # testing
 coverage
