@@ -1,11 +1,24 @@
 import { createClient } from "@libsql/client";
 import { logger } from "@parody/logger";
 import { drizzle } from "drizzle-orm/libsql";
+import * as authAccount from "./schema/auth-account";
+import * as authAccountTeamRole from "./schema/auth-account-team-role";
+import * as session from "./schema/session";
+import * as team from "./schema/team";
+import * as teamRole from "./schema/team-role";
+
 import * as user from "./schema/user";
 
 import type { Logger } from "drizzle-orm";
 
-const schema = { ...user };
+const schema = {
+	...authAccountTeamRole,
+	...authAccount,
+	...session,
+	...team,
+	...teamRole,
+	...user,
+};
 
 if (!process.env.TURSO_CONNECTION_URL) {
 	throw new Error("TURSO_CONNECTION_URL is not set");

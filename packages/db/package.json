@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@libsql/client": "^0.10.0",
+    "@parody/core": "workspace:*",
     "@parody/logger": "workspace:*",
     "drizzle-orm": "^0.33.0",
     "drizzle-zod": "^0.5.1",

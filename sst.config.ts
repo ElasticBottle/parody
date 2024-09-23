@@ -2,16 +2,13 @@
 import { readdirSync } from "node:fs";
 export default $config({
 	app(input) {
-		let deployProfile = "parody-dev";
+		let deployProfile: string | undefined = "parody-dev";
 		if (input.stage === "production") {
 			deployProfile = "parody-production";
 		} else if (process.env.GITHUB_ACTIONS) {
 			deployProfile = undefined;
 		}
-		console.log(
-			"process.env.STRIPE_API_SECRET_KEY",
-			process.env.STRIPE_API_SECRET_KEY,
-		);
+
 		return {
 			name: "parody",
 			removal: input?.stage === "production" ? "retain" : "remove",

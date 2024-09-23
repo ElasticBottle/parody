@@ -11,6 +11,10 @@
       "types": "./dist/image/*.d.ts",
       "default": "./src/image/*.ts"
     },
+    "./random/*": {
+      "types": "./dist/random/*.d.ts",
+      "default": "./src/random/*.ts"
+    },
     "./schema/*": {
       "types": "./dist/schema/*.d.ts",
       "default": "./src/schema/*.ts"
