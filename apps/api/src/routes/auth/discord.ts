@@ -20,11 +20,12 @@ discordRouter
 		);
 
 		const state = generateState();
-		Resource.KvStore.put(`discord-${state}`, JSON.stringify({ state }), {
+		await Resource.KvStore.put(`discord-${state}`, JSON.stringify({ state }), {
 			expirationTtl: 60 * 15, // 15 minutes
 		});
+		// https://discord.com/developers/docs/topics/oauth2
 		const authorizationURL = await discord.createAuthorizationURL(state, {
-			scopes: ["email", "openid", "identify"],
+			scopes: ["email", "openid"],
 		});
 
 		return c.redirect(authorizationURL.href);
@@ -45,8 +46,8 @@ discordRouter
 				redirectUrl,
 			);
 
-			const existingState = await Resource.KvStore.get(
-				`discord-${result.state}`,
+			const { state: existingState } = JSON.parse(
+				(await Resource.KvStore.get(`discord-${result.state}`)) ?? "",
 			);
 			if (!existingState || existingState !== result.state) {
 				return c.json({ message: "Invalid state" }, 400);
