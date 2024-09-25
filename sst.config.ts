@@ -16,7 +16,7 @@ export default $config({
 			providers: {
 				aws: {
 					region: "us-west-2",
-					profile: deployProfile,
+					...(deployProfile ? { profile: deployProfile } : {}),
 				},
 				"pulumi-stripe": true,
 				cloudflare: true,

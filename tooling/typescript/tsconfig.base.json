@@ -18,6 +18,7 @@
 
     /** Strictness */
     "strict": true,
+    "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
     "checkJs": true,
     "noFallthroughCasesInSwitch": true,

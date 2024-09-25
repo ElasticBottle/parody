@@ -8,5 +8,5 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   },
-  "include": ["src"]
+  "include": ["src", "sst-env.d.ts"]
 }
