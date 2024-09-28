@@ -5,7 +5,7 @@ import { Label } from "@parody/ui/label";
 import { Textarea } from "@parody/ui/textarea";
 import { createFileRoute, useRouterState } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/dashboard/product/$productId")({
+export const Route = createFileRoute("/dashboard/$teamName/$projectName")({
 	component: ProductComponent,
 	beforeLoad(ctx) {
 		return {

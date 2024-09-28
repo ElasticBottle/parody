@@ -1,13 +1,10 @@
 import { generateId } from "@parody/core/random/generate-id";
-import { relations } from "drizzle-orm";
 import { integer, text } from "drizzle-orm/sqlite-core";
-import { sqliteAuthTable } from "./_table";
-import { authAccountTable } from "./auth-account";
+import { sqliteAppTable } from "./_table";
 import { projectTable } from "./project";
-import { sessionTable } from "./session";
 
-export const userTable = sqliteAuthTable("user", {
-	id: text("user_id")
+export const apiKeyTable = sqliteAppTable("api_key", {
+	id: text("api_key_id")
 		.primaryKey()
 		.notNull()
 		.$defaultFn(() => generateId()),
@@ -15,12 +12,17 @@ export const userTable = sqliteAuthTable("user", {
 		onDelete: "cascade",
 		onUpdate: "cascade",
 	}),
-	username: text("username"),
-	firstName: text("first_name"),
-	lastName: text("last_name"),
-	additional_info: text("additional_info", { mode: "json" }).$type<
-		Record<string, string | number | boolean>
+	name: text("name").notNull(),
+	description: text("description"),
+	allowlistedDomains: text("allowlisted_domains", { mode: "json" }).$type<
+		Array<string>
 	>(),
+	allowlistBundleIdentifiers: text("allowlist_bundle_identifiers", {
+		mode: "json",
+	}).$type<Array<string>>(),
+	publicKey: text("public_key").notNull(),
+	privateKey: text("private_key").notNull(),
+	expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
 	created_at: integer("created_at", { mode: "timestamp" })
 		.notNull()
 		.$defaultFn(() => new Date()),
@@ -28,11 +30,4 @@ export const userTable = sqliteAuthTable("user", {
 		.notNull()
 		.$onUpdateFn(() => new Date()),
 	deleted_at: integer("deleted_at", { mode: "timestamp" }),
-});
-
-export const userRelations = relations(userTable, ({ many }) => {
-	return {
-		authAccounts: many(authAccountTable),
-		sessions: many(sessionTable),
-	};
 });

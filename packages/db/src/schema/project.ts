@@ -1,23 +1,15 @@
 import { generateId } from "@parody/core/random/generate-id";
-import { relations } from "drizzle-orm";
 import { integer, text } from "drizzle-orm/sqlite-core";
-import { sqliteAuthTable } from "./_table";
-import { projectTable } from "./project";
-import { teamRoleTable } from "./team-role";
+import { sqliteAppTable } from "./_table";
 
-export const teamTable = sqliteAuthTable("team", {
-	id: text("team_id")
+export const projectTable = sqliteAppTable("project", {
+	id: text("project_id")
 		.primaryKey()
 		.notNull()
 		.$defaultFn(() => generateId()),
+	teamId: text("team_id"),
 	name: text("name").notNull(),
 	description: text("description"),
-	projectId: text("project_id")
-		.notNull()
-		.references(() => projectTable.id, {
-			onDelete: "cascade",
-			onUpdate: "cascade",
-		}),
 	created_at: integer("created_at", { mode: "timestamp" })
 		.notNull()
 		.$defaultFn(() => new Date()),
@@ -25,10 +17,4 @@ export const teamTable = sqliteAuthTable("team", {
 		.notNull()
 		.$onUpdateFn(() => new Date()),
 	deleted_at: integer("deleted_at", { mode: "timestamp" }),
-});
-
-export const teamRelations = relations(teamTable, ({ many }) => {
-	return {
-		teamRoles: many(teamRoleTable),
-	};
 });

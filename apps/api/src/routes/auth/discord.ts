@@ -1,5 +1,7 @@
+import { Schema } from "@effect/schema";
 import { effectValidator } from "@hono/effect-validator";
 import { Discord, OAuth2RequestError, generateState } from "arctic";
+import { Effect } from "effect";
 import { Hono } from "hono";
 import { Resource } from "sst";
 import type { Env } from "../../lib/env";
@@ -13,6 +15,22 @@ const redirectUrl = `${"https://parody-elasticbottle-apiscript.winstonyeo99.work
 
 discordRouter
 	.get("/", async (c) => {
+		const task1 = Effect.succeed(1);
+		const task2 = Effect.fail("Oh uh!").pipe(Effect.as(2));
+		const task3 = Effect.succeed(3);
+		const task4 = Effect.fail("Oh no!").pipe(Effect.as(4));
+
+		const program = task1.pipe(
+			Effect.as(task2),
+			Effect.as(task3),
+			Effect.as(task4),
+		);
+
+		Effect.runPromise(program).then(console.log, console.error);
+
+		Schema.TaggedError;
+		throw new Error("termintate");
+
 		const discord = new Discord(
 			c.env.DISCORD_CLIENT_ID,
 			c.env.DISCORD_CLIENT_SECRET,
