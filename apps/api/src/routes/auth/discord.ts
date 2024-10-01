@@ -3,6 +3,7 @@ import { effectValidator } from "@hono/effect-validator";
 import { ConfigProvider, Effect, Layer, Option } from "effect";
 import { Hono } from "hono";
 import * as DiscordProvider from "~/lib/auth/discord/config";
+import { InvalidState, LoginTimeout } from "~/lib/auth/errors";
 import { CloudflareKvStore } from "~/services/kv-store";
 import { OauthStateGenerator } from "../../lib/auth/ouath-state-generator";
 import {
@@ -83,19 +84,12 @@ discordRouter
           );
 
           const oauthState = yield* Option.match(oauthStateOption, {
-            onNone: () =>
-              Effect.fail({
-                message: "Login Timeout. Please try logging in again.",
-                _tag: "timeout" as const,
-              }),
+            onNone: () => new LoginTimeout(),
             onSome: (state) => Effect.succeed(state),
           });
 
           if (oauthState.state !== result.state) {
-            return yield* Effect.fail({
-              message: "Invalid state, please try to login again.",
-              _tag: "invalid_state" as const,
-            });
+            return yield* new InvalidState();
           }
 
           const oAuth2Tokens = yield* discord.validateAuthorizationCode(
@@ -116,13 +110,16 @@ discordRouter
           ),
           Effect.provide(CloudflareKvStore.withTtlLayerLive),
           Effect.catchTags({
-            invalid_state: (e) => {
-              return Effect.succeed({ result: e, status: 400 });
-            },
-            timeout: (e) => {
-              return Effect.succeed({ result: e, status: 400 });
-            },
             oauth_failure: (e) => {
+              return Effect.succeed({ result: e, status: 400 });
+            },
+            "auth.errors.InvalidState": (e) => {
+              return Effect.succeed({ result: e.message, status: 400 });
+            },
+            "auth.errors.LoginTimeout": (e) => {
+              return Effect.succeed({ result: e.message, status: 400 });
+            },
+            "arctic.OauthRequestInvalidResponseError": (e) => {
               return Effect.succeed({ result: e, status: 400 });
             },
             "arctic.OauthRequestError": (e) => {
