@@ -9,26 +9,26 @@ import * as teamRole from "./schema/team-role";
 import * as user from "./schema/user";
 
 const schema = {
-	...authAccountTeamRole,
-	...authAccount,
-	...session,
-	...team,
-	...teamRole,
-	...user,
+  ...authAccountTeamRole,
+  ...authAccount,
+  ...session,
+  ...team,
+  ...teamRole,
+  ...user,
 };
 
 if (!process.env.TURSO_CONNECTION_URL) {
-	throw new Error("TURSO_CONNECTION_URL is not set");
+  throw new Error("TURSO_CONNECTION_URL is not set");
 }
 if (!process.env.TURSO_AUTH_TOKEN) {
-	throw new Error("TURSO_AUTH_TOKEN is not set");
+  throw new Error("TURSO_AUTH_TOKEN is not set");
 }
 
 const client = createClient({
-	url: process.env.TURSO_CONNECTION_URL,
-	authToken: process.env.TURSO_AUTH_TOKEN,
+  url: process.env.TURSO_CONNECTION_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
 export const db = drizzle(client, {
-	schema,
+  schema,
 });
