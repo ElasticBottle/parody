@@ -1,16 +1,33 @@
-import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import {
+  Outlet,
+  createRootRouteWithContext,
+  useRouterState,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { Spinner } from "../components/Spinner";
 import "@parody/ui/globals.css";
-import { Toaster } from "@parody/ui/sonner";
+
+function RouterSpinner() {
+  const isLoading = useRouterState({ select: (s) => s.status === "pending" });
+  return <Spinner show={isLoading} />;
+}
 
 export const Route = createRootRouteWithContext<{
-	getTitle?: () => string;
+  queryClient: QueryClient;
 }>()({
-	component: () => (
-		<>
-			<Outlet />
-			<Toaster />
-			<TanStackRouterDevtools />
-		</>
-	),
+  component: RootComponent,
 });
+
+function RootComponent() {
+  return (
+    <>
+      <div className={"flex min-h-screen flex-col"}>
+        <Outlet />
+      </div>
+      <ReactQueryDevtools buttonPosition="top-right" />
+      <TanStackRouterDevtools position="bottom-right" />
+    </>
+  );
+}

@@ -2,7 +2,6 @@
   "extends": "@parody/typescript/tsconfig.base.json",
   "compilerOptions": {
     "module": "ESNext",
-
     /* Bundler mode */
     "allowImportingTsExtensions": true
   },

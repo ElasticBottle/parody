@@ -7,8 +7,8 @@ import { defineConfig } from "vite";
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-	plugins: [TanStackRouterVite(), react()],
-	resolve: {
-		alias: [{ find: "~", replacement: path.resolve(dirname, "src") }],
-	},
+  plugins: [TanStackRouterVite(), react()],
+  resolve: {
+    alias: [{ find: "~", replacement: path.resolve(dirname, "src") }],
+  },
 });

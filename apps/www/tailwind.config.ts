@@ -3,10 +3,10 @@ import type { Config } from "tailwindcss";
 
 /** @type {import('tailwindcss').Config} */
 export default {
-	presets: [baseConfig],
-	content: [...baseConfig.content],
-	theme: {
-		extend: {},
-	},
-	plugins: [],
+  presets: [baseConfig],
+  content: [...baseConfig.content],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
 } satisfies Config;

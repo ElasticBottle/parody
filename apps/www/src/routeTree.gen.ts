@@ -13,14 +13,11 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as ProductImport } from './routes/product'
 import { Route as LoginImport } from './routes/login'
 import { Route as DashboardImport } from './routes/dashboard'
-import { Route as ProductPhotoImport } from './routes/product.photo'
-import { Route as ProductNameImport } from './routes/product.name'
-import { Route as DashboardTeamNameImport } from './routes/dashboard/$teamName'
-import { Route as DashboardTeamNameProjectNameImport } from './routes/dashboard/$teamName/$projectName'
-import { Route as DashboardTeamNameProjectNameUserImport } from './routes/dashboard/$teamName/$projectName/user'
+import { Route as DashboardIndexImport } from './routes/dashboard/index'
+import { Route as DashboardTeamNameIndexImport } from './routes/dashboard/$teamName/index'
+import { Route as DashboardTeamNameProjectNameIndexImport } from './routes/dashboard/$teamName/$projectName/index'
 import { Route as DashboardTeamNameProjectNameApiKeyImport } from './routes/dashboard/$teamName/$projectName/api-key'
 
 // Create Virtual Routes
@@ -28,11 +25,6 @@ import { Route as DashboardTeamNameProjectNameApiKeyImport } from './routes/dash
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
-
-const ProductRoute = ProductImport.update({
-  path: '/product',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const LoginRoute = LoginImport.update({
   path: '/login',
@@ -49,37 +41,26 @@ const IndexLazyRoute = IndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 
-const ProductPhotoRoute = ProductPhotoImport.update({
-  path: '/photo',
-  getParentRoute: () => ProductRoute,
-} as any)
-
-const ProductNameRoute = ProductNameImport.update({
-  path: '/name',
-  getParentRoute: () => ProductRoute,
-} as any)
-
-const DashboardTeamNameRoute = DashboardTeamNameImport.update({
-  path: '/$teamName',
+const DashboardIndexRoute = DashboardIndexImport.update({
+  path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
 
-const DashboardTeamNameProjectNameRoute =
-  DashboardTeamNameProjectNameImport.update({
-    path: '/$projectName',
-    getParentRoute: () => DashboardTeamNameRoute,
-  } as any)
+const DashboardTeamNameIndexRoute = DashboardTeamNameIndexImport.update({
+  path: '/$teamName/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
-const DashboardTeamNameProjectNameUserRoute =
-  DashboardTeamNameProjectNameUserImport.update({
-    path: '/user',
-    getParentRoute: () => DashboardTeamNameProjectNameRoute,
+const DashboardTeamNameProjectNameIndexRoute =
+  DashboardTeamNameProjectNameIndexImport.update({
+    path: '/$teamName/$projectName/',
+    getParentRoute: () => DashboardRoute,
   } as any)
 
 const DashboardTeamNameProjectNameApiKeyRoute =
   DashboardTeamNameProjectNameApiKeyImport.update({
-    path: '/api-key',
-    getParentRoute: () => DashboardTeamNameProjectNameRoute,
+    path: '/$teamName/$projectName/api-key',
+    getParentRoute: () => DashboardRoute,
   } as any)
 
 // Populate the FileRoutesByPath interface
@@ -107,139 +88,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
-    '/product': {
-      id: '/product'
-      path: '/product'
-      fullPath: '/product'
-      preLoaderRoute: typeof ProductImport
-      parentRoute: typeof rootRoute
-    }
-    '/dashboard/$teamName': {
-      id: '/dashboard/$teamName'
-      path: '/$teamName'
-      fullPath: '/dashboard/$teamName'
-      preLoaderRoute: typeof DashboardTeamNameImport
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexImport
       parentRoute: typeof DashboardImport
     }
-    '/product/name': {
-      id: '/product/name'
-      path: '/name'
-      fullPath: '/product/name'
-      preLoaderRoute: typeof ProductNameImport
-      parentRoute: typeof ProductImport
-    }
-    '/product/photo': {
-      id: '/product/photo'
-      path: '/photo'
-      fullPath: '/product/photo'
-      preLoaderRoute: typeof ProductPhotoImport
-      parentRoute: typeof ProductImport
-    }
-    '/dashboard/$teamName/$projectName': {
-      id: '/dashboard/$teamName/$projectName'
-      path: '/$projectName'
-      fullPath: '/dashboard/$teamName/$projectName'
-      preLoaderRoute: typeof DashboardTeamNameProjectNameImport
-      parentRoute: typeof DashboardTeamNameImport
+    '/dashboard/$teamName/': {
+      id: '/dashboard/$teamName/'
+      path: '/$teamName'
+      fullPath: '/dashboard/$teamName'
+      preLoaderRoute: typeof DashboardTeamNameIndexImport
+      parentRoute: typeof DashboardImport
     }
     '/dashboard/$teamName/$projectName/api-key': {
       id: '/dashboard/$teamName/$projectName/api-key'
-      path: '/api-key'
+      path: '/$teamName/$projectName/api-key'
       fullPath: '/dashboard/$teamName/$projectName/api-key'
       preLoaderRoute: typeof DashboardTeamNameProjectNameApiKeyImport
-      parentRoute: typeof DashboardTeamNameProjectNameImport
+      parentRoute: typeof DashboardImport
     }
-    '/dashboard/$teamName/$projectName/user': {
-      id: '/dashboard/$teamName/$projectName/user'
-      path: '/user'
-      fullPath: '/dashboard/$teamName/$projectName/user'
-      preLoaderRoute: typeof DashboardTeamNameProjectNameUserImport
-      parentRoute: typeof DashboardTeamNameProjectNameImport
+    '/dashboard/$teamName/$projectName/': {
+      id: '/dashboard/$teamName/$projectName/'
+      path: '/$teamName/$projectName'
+      fullPath: '/dashboard/$teamName/$projectName'
+      preLoaderRoute: typeof DashboardTeamNameProjectNameIndexImport
+      parentRoute: typeof DashboardImport
     }
   }
 }
 
 // Create and export the route tree
 
-interface DashboardTeamNameProjectNameRouteChildren {
-  DashboardTeamNameProjectNameApiKeyRoute: typeof DashboardTeamNameProjectNameApiKeyRoute
-  DashboardTeamNameProjectNameUserRoute: typeof DashboardTeamNameProjectNameUserRoute
-}
-
-const DashboardTeamNameProjectNameRouteChildren: DashboardTeamNameProjectNameRouteChildren =
-  {
-    DashboardTeamNameProjectNameApiKeyRoute:
-      DashboardTeamNameProjectNameApiKeyRoute,
-    DashboardTeamNameProjectNameUserRoute:
-      DashboardTeamNameProjectNameUserRoute,
-  }
-
-const DashboardTeamNameProjectNameRouteWithChildren =
-  DashboardTeamNameProjectNameRoute._addFileChildren(
-    DashboardTeamNameProjectNameRouteChildren,
-  )
-
-interface DashboardTeamNameRouteChildren {
-  DashboardTeamNameProjectNameRoute: typeof DashboardTeamNameProjectNameRouteWithChildren
-}
-
-const DashboardTeamNameRouteChildren: DashboardTeamNameRouteChildren = {
-  DashboardTeamNameProjectNameRoute:
-    DashboardTeamNameProjectNameRouteWithChildren,
-}
-
-const DashboardTeamNameRouteWithChildren =
-  DashboardTeamNameRoute._addFileChildren(DashboardTeamNameRouteChildren)
-
 interface DashboardRouteChildren {
-  DashboardTeamNameRoute: typeof DashboardTeamNameRouteWithChildren
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardTeamNameIndexRoute: typeof DashboardTeamNameIndexRoute
+  DashboardTeamNameProjectNameApiKeyRoute: typeof DashboardTeamNameProjectNameApiKeyRoute
+  DashboardTeamNameProjectNameIndexRoute: typeof DashboardTeamNameProjectNameIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardTeamNameRoute: DashboardTeamNameRouteWithChildren,
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardTeamNameIndexRoute: DashboardTeamNameIndexRoute,
+  DashboardTeamNameProjectNameApiKeyRoute:
+    DashboardTeamNameProjectNameApiKeyRoute,
+  DashboardTeamNameProjectNameIndexRoute:
+    DashboardTeamNameProjectNameIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
-interface ProductRouteChildren {
-  ProductNameRoute: typeof ProductNameRoute
-  ProductPhotoRoute: typeof ProductPhotoRoute
-}
-
-const ProductRouteChildren: ProductRouteChildren = {
-  ProductNameRoute: ProductNameRoute,
-  ProductPhotoRoute: ProductPhotoRoute,
-}
-
-const ProductRouteWithChildren =
-  ProductRoute._addFileChildren(ProductRouteChildren)
-
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
-  '/product': typeof ProductRouteWithChildren
-  '/dashboard/$teamName': typeof DashboardTeamNameRouteWithChildren
-  '/product/name': typeof ProductNameRoute
-  '/product/photo': typeof ProductPhotoRoute
-  '/dashboard/$teamName/$projectName': typeof DashboardTeamNameProjectNameRouteWithChildren
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/$teamName': typeof DashboardTeamNameIndexRoute
   '/dashboard/$teamName/$projectName/api-key': typeof DashboardTeamNameProjectNameApiKeyRoute
-  '/dashboard/$teamName/$projectName/user': typeof DashboardTeamNameProjectNameUserRoute
+  '/dashboard/$teamName/$projectName': typeof DashboardTeamNameProjectNameIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
-  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
-  '/product': typeof ProductRouteWithChildren
-  '/dashboard/$teamName': typeof DashboardTeamNameRouteWithChildren
-  '/product/name': typeof ProductNameRoute
-  '/product/photo': typeof ProductPhotoRoute
-  '/dashboard/$teamName/$projectName': typeof DashboardTeamNameProjectNameRouteWithChildren
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/$teamName': typeof DashboardTeamNameIndexRoute
   '/dashboard/$teamName/$projectName/api-key': typeof DashboardTeamNameProjectNameApiKeyRoute
-  '/dashboard/$teamName/$projectName/user': typeof DashboardTeamNameProjectNameUserRoute
+  '/dashboard/$teamName/$projectName': typeof DashboardTeamNameProjectNameIndexRoute
 }
 
 export interface FileRoutesById {
@@ -247,13 +165,10 @@ export interface FileRoutesById {
   '/': typeof IndexLazyRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
-  '/product': typeof ProductRouteWithChildren
-  '/dashboard/$teamName': typeof DashboardTeamNameRouteWithChildren
-  '/product/name': typeof ProductNameRoute
-  '/product/photo': typeof ProductPhotoRoute
-  '/dashboard/$teamName/$projectName': typeof DashboardTeamNameProjectNameRouteWithChildren
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/$teamName/': typeof DashboardTeamNameIndexRoute
   '/dashboard/$teamName/$projectName/api-key': typeof DashboardTeamNameProjectNameApiKeyRoute
-  '/dashboard/$teamName/$projectName/user': typeof DashboardTeamNameProjectNameUserRoute
+  '/dashboard/$teamName/$projectName/': typeof DashboardTeamNameProjectNameIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -262,37 +177,27 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/login'
-    | '/product'
+    | '/dashboard/'
     | '/dashboard/$teamName'
-    | '/product/name'
-    | '/product/photo'
-    | '/dashboard/$teamName/$projectName'
     | '/dashboard/$teamName/$projectName/api-key'
-    | '/dashboard/$teamName/$projectName/user'
+    | '/dashboard/$teamName/$projectName'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard'
     | '/login'
-    | '/product'
+    | '/dashboard'
     | '/dashboard/$teamName'
-    | '/product/name'
-    | '/product/photo'
-    | '/dashboard/$teamName/$projectName'
     | '/dashboard/$teamName/$projectName/api-key'
-    | '/dashboard/$teamName/$projectName/user'
+    | '/dashboard/$teamName/$projectName'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/login'
-    | '/product'
-    | '/dashboard/$teamName'
-    | '/product/name'
-    | '/product/photo'
-    | '/dashboard/$teamName/$projectName'
+    | '/dashboard/'
+    | '/dashboard/$teamName/'
     | '/dashboard/$teamName/$projectName/api-key'
-    | '/dashboard/$teamName/$projectName/user'
+    | '/dashboard/$teamName/$projectName/'
   fileRoutesById: FileRoutesById
 }
 
@@ -300,14 +205,12 @@ export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
-  ProductRoute: typeof ProductRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
-  ProductRoute: ProductRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -324,8 +227,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/dashboard",
-        "/login",
-        "/product"
+        "/login"
       ]
     },
     "/": {
@@ -334,49 +236,30 @@ export const routeTree = rootRoute
     "/dashboard": {
       "filePath": "dashboard.tsx",
       "children": [
-        "/dashboard/$teamName"
+        "/dashboard/",
+        "/dashboard/$teamName/",
+        "/dashboard/$teamName/$projectName/api-key",
+        "/dashboard/$teamName/$projectName/"
       ]
     },
     "/login": {
       "filePath": "login.tsx"
     },
-    "/product": {
-      "filePath": "product.tsx",
-      "children": [
-        "/product/name",
-        "/product/photo"
-      ]
+    "/dashboard/": {
+      "filePath": "dashboard/index.tsx",
+      "parent": "/dashboard"
     },
-    "/dashboard/$teamName": {
-      "filePath": "dashboard/$teamName.tsx",
-      "parent": "/dashboard",
-      "children": [
-        "/dashboard/$teamName/$projectName"
-      ]
-    },
-    "/product/name": {
-      "filePath": "product.name.tsx",
-      "parent": "/product"
-    },
-    "/product/photo": {
-      "filePath": "product.photo.tsx",
-      "parent": "/product"
-    },
-    "/dashboard/$teamName/$projectName": {
-      "filePath": "dashboard/$teamName/$projectName.tsx",
-      "parent": "/dashboard/$teamName",
-      "children": [
-        "/dashboard/$teamName/$projectName/api-key",
-        "/dashboard/$teamName/$projectName/user"
-      ]
+    "/dashboard/$teamName/": {
+      "filePath": "dashboard/$teamName/index.tsx",
+      "parent": "/dashboard"
     },
     "/dashboard/$teamName/$projectName/api-key": {
       "filePath": "dashboard/$teamName/$projectName/api-key.tsx",
-      "parent": "/dashboard/$teamName/$projectName"
+      "parent": "/dashboard"
     },
-    "/dashboard/$teamName/$projectName/user": {
-      "filePath": "dashboard/$teamName/$projectName/user.tsx",
-      "parent": "/dashboard/$teamName/$projectName"
+    "/dashboard/$teamName/$projectName/": {
+      "filePath": "dashboard/$teamName/$projectName/index.tsx",
+      "parent": "/dashboard"
     }
   }
 }
