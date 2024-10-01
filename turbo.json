@@ -30,12 +30,6 @@
         ".expo/**"
       ]
     },
-    "start": {
-      "cache": false
-    },
-    "test": {
-      "cache": false
-    },
     "clean": {
       "cache": false
     },
@@ -48,6 +42,7 @@
       "persistent": true,
       "cache": false
     },
+    "format": {},
     "lint": {
       "dependsOn": ["^topo", "^build"]
     },

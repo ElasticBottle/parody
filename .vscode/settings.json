@@ -27,5 +27,8 @@
     "opfs",
     "typecheck",
     "yanta"
-  ]
+  ],
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  }
 }

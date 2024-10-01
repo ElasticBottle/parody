@@ -1,98 +1,108 @@
-import { Schema } from "@effect/schema";
 import { effectValidator } from "@hono/effect-validator";
-import { Discord, OAuth2RequestError, generateState } from "arctic";
-import { Effect } from "effect";
+import { Discord, OAuth2RequestError } from "arctic";
+import { ConfigProvider, Effect, Layer } from "effect";
 import { Hono } from "hono";
 import { Resource } from "sst";
+import * as DiscordProvider from "~/lib/auth/discord/config";
+import { CloudflareKvStore } from "~/services/kv-store";
+import { OauthStateGenerator } from "../../lib/auth/ouath-state-generator";
+import {
+  DiscordOauthCallbackSchema,
+  OauthInputSchema,
+  OauthStateSchema,
+} from "../../lib/auth/schema";
 import type { Env } from "../../lib/env";
-import { DiscordOauthCallbackSchema } from "../../lib/schema/oauth-callback";
-
 export const discordRouter = new Hono<{
-	Bindings: Env;
+  Bindings: Env;
 }>();
 
 const redirectUrl = `${"https://parody-elasticbottle-apiscript.winstonyeo99.workers.dev"}/login/discord/callback`;
 
 discordRouter
-	.get("/", async (c) => {
-		const task1 = Effect.succeed(1);
-		const task2 = Effect.fail("Oh uh!").pipe(Effect.as(2));
-		const task3 = Effect.succeed(3);
-		const task4 = Effect.fail("Oh no!").pipe(Effect.as(4));
+  .get("/", effectValidator("query", OauthInputSchema), async (c) => {
+    const getAuthorizationUrl = (redirectUrl: string, publicKey: string) => {
+      return Effect.gen(function* () {
+        const kvStore = (yield* CloudflareKvStore).forSchema(OauthStateSchema);
+        const stateGenerator = yield* OauthStateGenerator;
+        const discord = yield* DiscordProvider.config(redirectUrl);
 
-		const program = task1.pipe(
-			Effect.as(task2),
-			Effect.as(task3),
-			Effect.as(task4),
-		);
+        const state = yield* stateGenerator.generateState;
+        yield* kvStore.setTtl(
+          `discord-${state}`,
+          {
+            publicKey,
+            redirectUrl,
+            state,
+          },
+          5 * 60, // 5 seconds
+        );
 
-		Effect.runPromise(program).then(console.log, console.error);
+        const url = yield* discord.createAuthorizationUrl(state);
+        return url;
+      });
+    };
 
-		Schema.TaggedError;
-		throw new Error("termintate");
+    const url = await Effect.runPromise(
+      getAuthorizationUrl(redirectUrl, c.req.valid("query").publicKey).pipe(
+        Effect.provide(
+          Layer.setConfigProvider(
+            ConfigProvider.fromMap(new Map(Object.entries(c.env)), {
+              pathDelim: "_",
+            }),
+          ),
+        ),
+        Effect.provide(CloudflareKvStore.withTtlLayerLive),
+        Effect.provide(OauthStateGenerator.nodeLive),
+      ),
+    );
 
-		const discord = new Discord(
-			c.env.DISCORD_CLIENT_ID,
-			c.env.DISCORD_CLIENT_SECRET,
-			redirectUrl,
-		);
+    return c.redirect(url.href);
+  })
 
-		const state = generateState();
-		await Resource.KvStore.put(`discord-${state}`, JSON.stringify({ state }), {
-			expirationTtl: 60 * 15, // 15 minutes
-		});
-		// https://discord.com/developers/docs/topics/oauth2
-		const authorizationURL = await discord.createAuthorizationURL(state, {
-			scopes: ["email", "openid"],
-		});
+  .get(
+    "/callback",
+    effectValidator("query", DiscordOauthCallbackSchema),
+    async (c) => {
+      const result = c.req.valid("query");
+      if (result.status === "error") {
+        return c.json(result);
+      }
 
-		return c.redirect(authorizationURL.href);
-	})
+      const discord = new Discord(
+        c.env.DISCORD_CLIENT_ID,
+        c.env.DISCORD_CLIENT_SECRET,
+        redirectUrl,
+      );
 
-	.get(
-		"/callback",
-		effectValidator("query", DiscordOauthCallbackSchema),
-		async (c) => {
-			const result = c.req.valid("query");
-			if (result.status === "error") {
-				return c.json(result);
-			}
+      const { state: existingState } = JSON.parse(
+        (await Resource.KvStore.get(`discord-${result.state}`)) ?? "",
+      );
+      if (!existingState || existingState !== result.state) {
+        return c.json({ message: "Invalid state" }, 400);
+      }
 
-			const discord = new Discord(
-				c.env.DISCORD_CLIENT_ID,
-				c.env.DISCORD_CLIENT_SECRET,
-				redirectUrl,
-			);
+      try {
+        const { accessToken, accessTokenExpiresAt, refreshToken } =
+          await discord.validateAuthorizationCode(result.code);
+        console.log(
+          "accessToken, accessTokenExpiresAt,refreshToken",
+          accessToken,
+          accessTokenExpiresAt,
+          refreshToken,
+        );
+      } catch (e) {
+        if (e instanceof OAuth2RequestError) {
+          if (e.message === "invalid_grant") {
+            return c.json(
+              { message: "Invalid grant. Please try logging in again." },
+              400,
+            );
+          }
+          return c.json({ message: "Unknown error" }, 500);
+        }
+        throw e;
+      }
 
-			const { state: existingState } = JSON.parse(
-				(await Resource.KvStore.get(`discord-${result.state}`)) ?? "",
-			);
-			if (!existingState || existingState !== result.state) {
-				return c.json({ message: "Invalid state" }, 400);
-			}
-
-			try {
-				const { accessToken, accessTokenExpiresAt, refreshToken } =
-					await discord.validateAuthorizationCode(result.code);
-				console.log(
-					"accessToken, accessTokenExpiresAt,refreshToken",
-					accessToken,
-					accessTokenExpiresAt,
-					refreshToken,
-				);
-			} catch (e) {
-				if (e instanceof OAuth2RequestError) {
-					if (e.message === "invalid_grant") {
-						return c.json(
-							{ message: "Invalid grant. Please try logging in again." },
-							400,
-						);
-					}
-					return c.json({ message: "Unknown error" }, 500);
-				}
-				throw e;
-			}
-
-			return c.json({ message: "Hello Cloudflare Workers!" });
-		},
-	);
+      return c.json({ message: "Hello Cloudflare Workers!" });
+    },
+  );
