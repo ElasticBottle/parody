@@ -3,11 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "sideEffects": false,
-  "files": [
-    "tailwind.config.ts",
-    "postcss.config.cjs",
-    "globals.css"
-  ],
+  "files": ["tailwind.config.ts", "postcss.config.cjs", "globals.css"],
   "exports": {
     "./*": "./src/components/*.tsx",
     "./cn": "./src/utils/cn.ts",
@@ -52,7 +48,6 @@
     "react-hook-form": "^7.53.0",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.23.8"
+    "tailwindcss-animate": "^1.0.7"
   }
 }
