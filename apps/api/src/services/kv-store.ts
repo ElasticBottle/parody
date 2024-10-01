@@ -163,8 +163,6 @@ export class CloudflareKvStore extends Context.Tag("kv-store/KvStoreWithExpr")<
       const kvStore = yield* KeyValueStore.KeyValueStore;
       const setTtl = (key: string, value: string, ttlSeconds: number) =>
         Effect.tryPromise(() => {
-          console.log("key, value", { key, value });
-          console.log(`ttlSeconds: ${ttlSeconds}`);
           return Resource.KvStore.put(key, value, {
             expirationTtl: ttlSeconds,
           });
@@ -191,9 +189,6 @@ export class CloudflareKvStore extends Context.Tag("kv-store/KvStoreWithExpr")<
           const encode = Schema.encode(jsonSchema);
 
           const setTtlSchema = (key: string, value: A, ttlSeconds: number) => {
-            console.log("key", key);
-            console.log("value", value);
-            console.log(`ttlSeconds: ${ttlSeconds}`);
             return Effect.flatMap(encode(value), (json) =>
               setTtl(key, json, ttlSeconds),
             );

@@ -16,7 +16,7 @@ export class DiscordProvider {
     return Effect.succeed(this.provider.createAuthorizationURL(state, scopes));
   }
 
-  async validateAuthorizationCode(code: string) {
+  validateAuthorizationCode(code: string) {
     return validateAuthorizationCode(
       () => this.provider.validateAuthorizationCode(code),
       "discord",

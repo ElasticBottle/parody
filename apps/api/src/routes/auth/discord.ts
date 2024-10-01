@@ -1,8 +1,7 @@
+import type { Schema } from "@effect/schema";
 import { effectValidator } from "@hono/effect-validator";
-import { Discord, OAuth2RequestError } from "arctic";
-import { ConfigProvider, Effect, Layer } from "effect";
+import { ConfigProvider, Effect, Layer, Option } from "effect";
 import { Hono } from "hono";
-import { Resource } from "sst";
 import * as DiscordProvider from "~/lib/auth/discord/config";
 import { CloudflareKvStore } from "~/services/kv-store";
 import { OauthStateGenerator } from "../../lib/auth/ouath-state-generator";
@@ -34,7 +33,7 @@ discordRouter
             redirectUrl,
             state,
           },
-          5 * 60, // 5 seconds
+          15 * 60, // 15 minutes
         );
 
         const url = yield* discord.createAuthorizationUrl(state);
@@ -63,46 +62,76 @@ discordRouter
     "/callback",
     effectValidator("query", DiscordOauthCallbackSchema),
     async (c) => {
-      const result = c.req.valid("query");
-      if (result.status === "error") {
-        return c.json(result);
-      }
-
-      const discord = new Discord(
-        c.env.DISCORD_CLIENT_ID,
-        c.env.DISCORD_CLIENT_SECRET,
-        redirectUrl,
-      );
-
-      const { state: existingState } = JSON.parse(
-        (await Resource.KvStore.get(`discord-${result.state}`)) ?? "",
-      );
-      if (!existingState || existingState !== result.state) {
-        return c.json({ message: "Invalid state" }, 400);
-      }
-
-      try {
-        const { accessToken, accessTokenExpiresAt, refreshToken } =
-          await discord.validateAuthorizationCode(result.code);
-        console.log(
-          "accessToken, accessTokenExpiresAt,refreshToken",
-          accessToken,
-          accessTokenExpiresAt,
-          refreshToken,
-        );
-      } catch (e) {
-        if (e instanceof OAuth2RequestError) {
-          if (e.message === "invalid_grant") {
-            return c.json(
-              { message: "Invalid grant. Please try logging in again." },
-              400,
-            );
+      const handleRedirect = (
+        result: Schema.Schema.Type<typeof DiscordOauthCallbackSchema>,
+      ) =>
+        Effect.gen(function* () {
+          const discord = yield* DiscordProvider.config(redirectUrl);
+          if (result.status === "error") {
+            return yield* Effect.fail({
+              ...result,
+              _tag: "oauth_failure" as const,
+            });
           }
-          return c.json({ message: "Unknown error" }, 500);
-        }
-        throw e;
-      }
 
-      return c.json({ message: "Hello Cloudflare Workers!" });
+          const kvStore = (yield* CloudflareKvStore).forSchema(
+            OauthStateSchema,
+          );
+
+          const oauthStateOption = yield* kvStore.get(
+            `discord-${result.state}`,
+          );
+
+          const oauthState = yield* Option.match(oauthStateOption, {
+            onNone: () =>
+              Effect.fail({
+                message: "Login Timeout. Please try logging in again.",
+                _tag: "timeout" as const,
+              }),
+            onSome: (state) => Effect.succeed(state),
+          });
+
+          if (oauthState.state !== result.state) {
+            return yield* Effect.fail({
+              message: "Invalid state, please try to login again.",
+              _tag: "invalid_state" as const,
+            });
+          }
+
+          const oAuth2Tokens = yield* discord.validateAuthorizationCode(
+            result.code,
+          );
+          const accessToken = oAuth2Tokens.accessToken();
+          return { result: { accessToken }, status: 200 };
+        });
+
+      const { result, status } = await Effect.runPromise(
+        handleRedirect(c.req.valid("query")).pipe(
+          Effect.provide(
+            Layer.setConfigProvider(
+              ConfigProvider.fromMap(new Map(Object.entries(c.env)), {
+                pathDelim: "_",
+              }),
+            ),
+          ),
+          Effect.provide(CloudflareKvStore.withTtlLayerLive),
+          Effect.catchTags({
+            invalid_state: (e) => {
+              return Effect.succeed({ result: e, status: 400 });
+            },
+            timeout: (e) => {
+              return Effect.succeed({ result: e, status: 400 });
+            },
+            oauth_failure: (e) => {
+              return Effect.succeed({ result: e, status: 400 });
+            },
+            "arctic.OauthRequestError": (e) => {
+              return Effect.succeed({ result: e, status: 400 });
+            },
+          }),
+        ),
+      );
+
+      return c.json(result, { status });
     },
   );
