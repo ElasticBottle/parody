@@ -9,12 +9,13 @@ import { sessionTable } from "./session";
 export const userTable = sqliteAuthTable("user", {
   id: text("user_id")
     .primaryKey()
-    .notNull()
     .$defaultFn(() => generateId()),
-  projectId: text("project_id").references(() => projectTable.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projectTable.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
   username: text("username"),
   firstName: text("first_name"),
   lastName: text("last_name"),

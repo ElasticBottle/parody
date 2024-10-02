@@ -1,6 +1,8 @@
 import type { Schema } from "@effect/schema";
+import * as SqliteDrizzle from "@effect/sql-drizzle/Sqlite";
+import { LibsqlClient } from "@effect/sql-libsql";
 import { effectValidator } from "@hono/effect-validator";
-import { ConfigProvider, Effect, Layer, Option } from "effect";
+import { Config, ConfigProvider, Effect, Layer, Option } from "effect";
 import { Hono } from "hono";
 import * as DiscordProvider from "~/lib/auth/discord/config";
 import { InvalidState, LoginTimeout } from "~/lib/auth/errors";
@@ -12,6 +14,7 @@ import {
   OauthStateSchema,
 } from "../../lib/auth/schema";
 import type { Env } from "../../lib/env";
+
 export const discordRouter = new Hono<{
   Bindings: Env;
 }>();
@@ -44,6 +47,15 @@ discordRouter
 
     const url = await Effect.runPromise(
       getAuthorizationUrl(redirectUrl, c.req.valid("query").publicKey).pipe(
+        Effect.provide(SqliteDrizzle.layer),
+        Effect.provide(
+          LibsqlClient.layer({
+            url: Config.string("TURSO_DATABASE_URL"),
+            authToken: Config.string("TURSO_AUTH_TOKEN"),
+          }),
+        ),
+        Effect.provide(CloudflareKvStore.withTtlLayerLive),
+        Effect.provide(OauthStateGenerator.nodeLive),
         Effect.provide(
           Layer.setConfigProvider(
             ConfigProvider.fromMap(new Map(Object.entries(c.env)), {
@@ -51,8 +63,6 @@ discordRouter
             }),
           ),
         ),
-        Effect.provide(CloudflareKvStore.withTtlLayerLive),
-        Effect.provide(OauthStateGenerator.nodeLive),
       ),
     );
 
