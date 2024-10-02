@@ -1,21 +1,26 @@
-import { generateId } from "@parody/core/random/generate-id";
 import { integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { sqliteAppTable } from "./_table";
+import { authAccountTable } from "./auth-account";
 import { teamTable } from "./team";
 import { userTable } from "./user";
 
 export const apiKeyTable = sqliteAppTable(
   "api_key",
   {
-    id: text("api_key_id")
-      .primaryKey()
-      .notNull()
-      .$defaultFn(() => generateId()),
-    teamId: text("team_id").references(() => teamTable.id, {
+    id: integer("api_key_id").primaryKey({
+      autoIncrement: true,
+    }),
+    teamId: integer("team_id").references(() => teamTable.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
-    userId: text("user_id")
+    authAccountId: integer("auth_account_id")
+      .notNull()
+      .references(() => authAccountTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    userId: integer("user_id")
       .notNull()
       .references(() => userTable.id, {
         onDelete: "cascade",

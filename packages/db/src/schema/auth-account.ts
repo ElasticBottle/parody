@@ -1,4 +1,3 @@
-import { generateId } from "@parody/core/random/generate-id";
 import { relations } from "drizzle-orm";
 import { index, integer, text } from "drizzle-orm/sqlite-core";
 import { sqliteAuthTable } from "./_table";
@@ -17,11 +16,8 @@ export const AUTH_PROVIDER_METHOD = [
 export const authAccountTable = sqliteAuthTable(
   "auth_account",
   {
-    id: text("account_id")
-      .primaryKey()
-      .notNull()
-      .$defaultFn(() => generateId()),
-    user_id: text("user_id").references(() => userTable.id, {
+    id: integer("account_id").primaryKey({ autoIncrement: true }),
+    user_id: integer("user_id").references(() => userTable.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),

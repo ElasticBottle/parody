@@ -1,4 +1,3 @@
-import { generateId } from "@parody/core/random/generate-id";
 import { relations } from "drizzle-orm";
 import { index, integer, text } from "drizzle-orm/sqlite-core";
 import { sqliteAuthTable } from "./_table";
@@ -7,11 +6,8 @@ import { teamTable } from "./team";
 export const teamRoleTable = sqliteAuthTable(
   "team_role",
   {
-    id: text("team_role_id")
-      .primaryKey()
-      .notNull()
-      .$defaultFn(() => generateId()),
-    team_id: text("team_id")
+    id: integer("team_role_id").primaryKey({ autoIncrement: true }),
+    team_id: integer("team_id")
       .notNull()
       .references(() => teamTable.id, {
         onDelete: "cascade",

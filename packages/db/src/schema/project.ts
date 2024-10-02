@@ -1,13 +1,9 @@
-import { generateId } from "@parody/core/random/generate-id";
 import { integer, text } from "drizzle-orm/sqlite-core";
 import { sqliteAppTable } from "./_table";
 
 export const projectTable = sqliteAppTable("project", {
-  id: text("project_id")
-    .primaryKey()
-    .notNull()
-    .$defaultFn(() => generateId()),
-  teamId: text("team_id"),
+  id: integer("project_id").primaryKey({ autoIncrement: true }),
+  teamId: integer("team_id"),
   name: text("name").notNull(),
   description: text("description"),
   created_at: integer("created_at", { mode: "timestamp" })

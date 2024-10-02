@@ -1,4 +1,3 @@
-import { generateId } from "@parody/core/random/generate-id";
 import { relations } from "drizzle-orm";
 import { integer, text } from "drizzle-orm/sqlite-core";
 import { sqliteAuthTable } from "./_table";
@@ -7,10 +6,8 @@ import { projectTable } from "./project";
 import { sessionTable } from "./session";
 
 export const userTable = sqliteAuthTable("user", {
-  id: text("user_id")
-    .primaryKey()
-    .$defaultFn(() => generateId()),
-  projectId: text("project_id")
+  id: text("user_id").primaryKey(),
+  projectId: integer("project_id")
     .notNull()
     .references(() => projectTable.id, {
       onDelete: "cascade",
