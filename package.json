@@ -1,12 +1,7 @@
 {
-  "name": "v1",
+  "name": "parody",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*",
-    "infra/*",
-    "tooling/*"
-  ],
+  "workspaces": ["packages/*", "apps/*", "infra/*", "tooling/*"],
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules .turbo .sst",
