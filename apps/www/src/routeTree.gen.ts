@@ -18,6 +18,7 @@ import { Route as DashboardImport } from './routes/dashboard'
 import { Route as DashboardIndexImport } from './routes/dashboard/index'
 import { Route as DashboardTeamNameIndexImport } from './routes/dashboard/$teamName/index'
 import { Route as DashboardTeamNameProjectNameIndexImport } from './routes/dashboard/$teamName/$projectName/index'
+import { Route as DashboardTeamNameProjectNamePlaygroundImport } from './routes/dashboard/$teamName/$projectName/playground'
 import { Route as DashboardTeamNameProjectNameApiKeyImport } from './routes/dashboard/$teamName/$projectName/api-key'
 
 // Create Virtual Routes
@@ -54,6 +55,12 @@ const DashboardTeamNameIndexRoute = DashboardTeamNameIndexImport.update({
 const DashboardTeamNameProjectNameIndexRoute =
   DashboardTeamNameProjectNameIndexImport.update({
     path: '/$teamName/$projectName/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+
+const DashboardTeamNameProjectNamePlaygroundRoute =
+  DashboardTeamNameProjectNamePlaygroundImport.update({
+    path: '/$teamName/$projectName/playground',
     getParentRoute: () => DashboardRoute,
   } as any)
 
@@ -109,6 +116,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTeamNameProjectNameApiKeyImport
       parentRoute: typeof DashboardImport
     }
+    '/dashboard/$teamName/$projectName/playground': {
+      id: '/dashboard/$teamName/$projectName/playground'
+      path: '/$teamName/$projectName/playground'
+      fullPath: '/dashboard/$teamName/$projectName/playground'
+      preLoaderRoute: typeof DashboardTeamNameProjectNamePlaygroundImport
+      parentRoute: typeof DashboardImport
+    }
     '/dashboard/$teamName/$projectName/': {
       id: '/dashboard/$teamName/$projectName/'
       path: '/$teamName/$projectName'
@@ -125,6 +139,7 @@ interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardTeamNameIndexRoute: typeof DashboardTeamNameIndexRoute
   DashboardTeamNameProjectNameApiKeyRoute: typeof DashboardTeamNameProjectNameApiKeyRoute
+  DashboardTeamNameProjectNamePlaygroundRoute: typeof DashboardTeamNameProjectNamePlaygroundRoute
   DashboardTeamNameProjectNameIndexRoute: typeof DashboardTeamNameProjectNameIndexRoute
 }
 
@@ -133,6 +148,8 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardTeamNameIndexRoute: DashboardTeamNameIndexRoute,
   DashboardTeamNameProjectNameApiKeyRoute:
     DashboardTeamNameProjectNameApiKeyRoute,
+  DashboardTeamNameProjectNamePlaygroundRoute:
+    DashboardTeamNameProjectNamePlaygroundRoute,
   DashboardTeamNameProjectNameIndexRoute:
     DashboardTeamNameProjectNameIndexRoute,
 }
@@ -148,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/$teamName': typeof DashboardTeamNameIndexRoute
   '/dashboard/$teamName/$projectName/api-key': typeof DashboardTeamNameProjectNameApiKeyRoute
+  '/dashboard/$teamName/$projectName/playground': typeof DashboardTeamNameProjectNamePlaygroundRoute
   '/dashboard/$teamName/$projectName': typeof DashboardTeamNameProjectNameIndexRoute
 }
 
@@ -157,6 +175,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/$teamName': typeof DashboardTeamNameIndexRoute
   '/dashboard/$teamName/$projectName/api-key': typeof DashboardTeamNameProjectNameApiKeyRoute
+  '/dashboard/$teamName/$projectName/playground': typeof DashboardTeamNameProjectNamePlaygroundRoute
   '/dashboard/$teamName/$projectName': typeof DashboardTeamNameProjectNameIndexRoute
 }
 
@@ -168,6 +187,7 @@ export interface FileRoutesById {
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/$teamName/': typeof DashboardTeamNameIndexRoute
   '/dashboard/$teamName/$projectName/api-key': typeof DashboardTeamNameProjectNameApiKeyRoute
+  '/dashboard/$teamName/$projectName/playground': typeof DashboardTeamNameProjectNamePlaygroundRoute
   '/dashboard/$teamName/$projectName/': typeof DashboardTeamNameProjectNameIndexRoute
 }
 
@@ -180,6 +200,7 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/$teamName'
     | '/dashboard/$teamName/$projectName/api-key'
+    | '/dashboard/$teamName/$projectName/playground'
     | '/dashboard/$teamName/$projectName'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -188,6 +209,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/$teamName'
     | '/dashboard/$teamName/$projectName/api-key'
+    | '/dashboard/$teamName/$projectName/playground'
     | '/dashboard/$teamName/$projectName'
   id:
     | '__root__'
@@ -197,6 +219,7 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/$teamName/'
     | '/dashboard/$teamName/$projectName/api-key'
+    | '/dashboard/$teamName/$projectName/playground'
     | '/dashboard/$teamName/$projectName/'
   fileRoutesById: FileRoutesById
 }
@@ -239,6 +262,7 @@ export const routeTree = rootRoute
         "/dashboard/",
         "/dashboard/$teamName/",
         "/dashboard/$teamName/$projectName/api-key",
+        "/dashboard/$teamName/$projectName/playground",
         "/dashboard/$teamName/$projectName/"
       ]
     },
@@ -255,6 +279,10 @@ export const routeTree = rootRoute
     },
     "/dashboard/$teamName/$projectName/api-key": {
       "filePath": "dashboard/$teamName/$projectName/api-key.tsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/$teamName/$projectName/playground": {
+      "filePath": "dashboard/$teamName/$projectName/playground.tsx",
       "parent": "/dashboard"
     },
     "/dashboard/$teamName/$projectName/": {
