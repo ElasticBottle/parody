@@ -1,0 +1,40 @@
+{
+  "name": "@cubeflair/oauth",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./errors": {
+      "types": "./dist/errors.d.ts",
+      "default": "./src/errors.ts"
+    },
+    "./supported-oauth": {
+      "types": "./dist/supported-oauth.d.ts",
+      "default": "./src/supported-oauth.ts"
+    },
+    "./provider": {
+      "types": "./dist/provider/index.d.ts",
+      "default": "./src/provider/index.ts"
+    },
+    "./oauth": {
+      "types": "./dist/oauth/index.d.ts",
+      "default": "./src/oauth/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc",
+    "clean": "rm -rf .turbo node_modules .cache",
+    "format": "bunx @biomejs/biome format .",
+    "lint": "bunx @biomejs/biome lint .",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@effect/platform": "^0.66.2",
+    "@effect/schema": "^0.74.1",
+    "effect": "^3.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.2",
+    "typescript": "^5.6.2"
+  }
+}

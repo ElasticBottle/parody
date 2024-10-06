@@ -7,8 +7,9 @@ const EnvSchema = Schema.Struct({
   GITHUB_CLIENT_SECRET: Schema.String.pipe(Schema.nonEmptyString()),
   TURSO_DATABASE_URL: Schema.String.pipe(Schema.nonEmptyString()),
   TURSO_AUTH_TOKEN: Schema.String.pipe(Schema.nonEmptyString()),
+  BASE_URL: Schema.Any,
 });
 
 export interface Env extends Schema.Schema.Type<typeof EnvSchema> {}
 
-export const decodeApiEnvFromUnknown = Schema.decodeUnknownSync(EnvSchema);
+export const decodeApiEnvFromUnknownSync = Schema.decodeUnknownSync(EnvSchema);

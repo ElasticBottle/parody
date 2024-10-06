@@ -1,20 +1,16 @@
 import { Schema } from "@effect/schema";
+import { ApiKey } from "~/services/api-key";
 
 export const OauthInputSchema = Schema.Struct({
   redirectUrl: Schema.String.pipe(Schema.nonEmptyString()),
-  publicKey: Schema.String.pipe(
-    Schema.nonEmptyString(),
-    Schema.startsWith("public_key_"),
-  ),
+  publicKey: ApiKey.PublicKeySchema,
 });
 
 export const OauthStateSchema = Schema.Struct({
   state: Schema.String.pipe(Schema.nonEmptyString()),
+  codeVerifier: Schema.String.pipe(Schema.nonEmptyString()),
   redirectUrl: Schema.String.pipe(Schema.nonEmptyString()),
-  publicKey: Schema.String.pipe(
-    Schema.nonEmptyString(),
-    Schema.startsWith("public_key_"),
-  ),
+  publicKey: ApiKey.PublicKeySchema,
 });
 
 // OAUTH CALLBACK SUCCESS
