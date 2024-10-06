@@ -82,3 +82,4 @@ tailwind.css
 # sst
 .sst
 sst-env.d.ts
+.aider*
