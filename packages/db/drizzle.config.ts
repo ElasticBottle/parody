@@ -6,7 +6,6 @@ if (!process.env.TURSO_DATABASE_URL) {
 if (!process.env.TURSO_AUTH_TOKEN) {
   throw new Error("TURSO_AUTH_TOKEN is not set");
 }
-
 export default {
   schema: "./src/schema/*",
   out: "./migrations",

@@ -1,10 +1,10 @@
 import { relations } from "drizzle-orm";
 import { integer } from "drizzle-orm/sqlite-core";
-import { sqliteAuthTable } from "./_table";
+import { sqlitePublicTable } from "./_table";
 import { authAccountTable } from "./auth-account";
 import { teamRoleTable } from "./team-role";
 
-export const authAccountTeamRoleTable = sqliteAuthTable(
+export const authAccountTeamRoleTable = sqlitePublicTable(
   "auth_account_team_role",
   {
     id: integer("account_team_role_id").primaryKey({ autoIncrement: true }),
@@ -20,13 +20,13 @@ export const authAccountTeamRoleTable = sqliteAuthTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    created_at: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
-    updated_at: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp" })
       .notNull()
       .$onUpdateFn(() => new Date()),
-    deleted_at: integer("deleted_at", { mode: "timestamp" }),
+    deletedAt: integer("deleted_at", { mode: "timestamp" }),
   },
 );
 

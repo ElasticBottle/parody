@@ -1,10 +1,15 @@
 import { integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import { sqliteAppTable } from "./_table";
+import { sqlitePublicTable } from "./_table";
 import { authAccountTable } from "./auth-account";
 import { teamTable } from "./team";
 import { userTable } from "./user";
 
-export const apiKeyTable = sqliteAppTable(
+export type SelectApiKey = typeof apiKeyTable.$inferSelect;
+export type SelectApiKeyWithProjectId = typeof apiKeyTable.$inferSelect & {
+  metadata: { projectId: number };
+};
+
+export const apiKeyTable = sqlitePublicTable(
   "api_key",
   {
     id: integer("api_key_id").primaryKey({
@@ -28,14 +33,19 @@ export const apiKeyTable = sqliteAppTable(
       }),
     name: text("name").notNull(),
     description: text("description"),
-    allowlistedDomains: text("allowlisted_domains", { mode: "json" }).$type<
-      Array<string>
-    >(),
-    allowlistBundleIdentifiers: text("allowlist_bundle_identifiers", {
+    allowedDomains: text("allowed_domains", { mode: "json" })
+      .notNull()
+      .$type<Array<string>>(),
+    allowedBundleIdentifiers: text("allowed_bundle_identifiers", {
       mode: "json",
-    }).$type<Array<string>>(),
+    })
+      .notNull()
+      .$type<Array<string>>(),
+    allowedRedirectUrls: text("allowed_redirect_urls", { mode: "json" })
+      .notNull()
+      .$type<Array<string>>(),
     metadata: text("metadata", { mode: "json" }).$type<
-      Record<string, string | number | boolean>
+      Record<string, string | number | boolean> | { projectId: number }
     >(),
     publicKey: text("public_key")
       .unique()
@@ -43,13 +53,13 @@ export const apiKeyTable = sqliteAppTable(
       .$type<`public_key_${string}`>(),
     hashedPrivateKey: text("hashed_private_key").unique().notNull(),
     expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-    created_at: integer("created_at", { mode: "timestamp" })
+    createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
-    updated_at: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer("updated_at", { mode: "timestamp" })
       .notNull()
       .$onUpdateFn(() => new Date()),
-    deleted_at: integer("deleted_at", { mode: "timestamp" }),
+    deletedAt: integer("deleted_at", { mode: "timestamp" }),
   },
   (table) => {
     return {
@@ -57,6 +67,7 @@ export const apiKeyTable = sqliteAppTable(
         table.hashedPrivateKey,
       ),
       publicKeyIdx: uniqueIndex("api_key_public_key_idx").on(table.publicKey),
+      privateKeyIdx: uniqueIndex("api_key_public_key_idx").on(table.publicKey),
     };
   },
 );
