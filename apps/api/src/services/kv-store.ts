@@ -25,11 +25,10 @@ interface ICloudflareKvStoreSchema<A, R>
   ) => Effect.Effect<void, SystemError | ParseError, R>;
 }
 
-export class CloudflareKvStore extends Effect.Tag("kv-store/KvStoreWithExpr")<
-  CloudflareKvStore,
-  ICloudflareKvStore
->() {
-  static keyValueStoreImpl = Layer.succeed(
+export class CloudflareKvStore extends Effect.Tag(
+  "@cubeflair/cloudflare-kv-store-service",
+)<CloudflareKvStore, ICloudflareKvStore>() {
+  static keyValueStoreLayer = Layer.succeed(
     KeyValueStore.KeyValueStore,
     KeyValueStore.make({
       remove: (key) =>
@@ -138,7 +137,7 @@ export class CloudflareKvStore extends Effect.Tag("kv-store/KvStoreWithExpr")<
     }),
   );
 
-  static withTtlLayer = Layer.effect(
+  static ttlLayer = Layer.effect(
     this,
     Effect.gen(function* () {
       const kvStore = yield* KeyValueStore.KeyValueStore;
@@ -178,9 +177,5 @@ export class CloudflareKvStore extends Effect.Tag("kv-store/KvStoreWithExpr")<
         },
       };
     }),
-  );
-
-  static withTtlLayerLive = this.withTtlLayer.pipe(
-    Layer.provide(this.keyValueStoreImpl),
-  );
+  ).pipe(Layer.provide(this.keyValueStoreLayer));
 }

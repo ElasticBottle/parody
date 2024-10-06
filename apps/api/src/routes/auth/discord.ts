@@ -1,61 +1,85 @@
+import { InvalidState, LoginTimeout } from "@cubeflair/oauth/errors";
+import { Oauth } from "@cubeflair/oauth/oauth";
+import { Discord } from "@cubeflair/oauth/provider";
+import { FetchHttpClient } from "@effect/platform";
 import type { Schema } from "@effect/schema";
-import * as SqliteDrizzle from "@effect/sql-drizzle/Sqlite";
-import { LibsqlClient } from "@effect/sql-libsql";
 import { effectValidator } from "@hono/effect-validator";
-import { Config, ConfigProvider, Effect, Layer, Option } from "effect";
+import { ConfigProvider, Effect, Layer, Option, pipe } from "effect";
 import { Hono } from "hono";
-import * as DiscordProvider from "~/lib/auth/discord/config";
-import { InvalidState, LoginTimeout } from "~/lib/auth/errors";
-import { CloudflareKvStore } from "~/services/kv-store";
-import { OauthStateGenerator } from "../../lib/auth/ouath-state-generator";
 import {
   DiscordOauthCallbackSchema,
   OauthInputSchema,
   OauthStateSchema,
-} from "../../lib/auth/schema";
+} from "~/lib/auth/schema";
+import { type ApiKey, ApiKeyService } from "~/services/api-key";
+import { CloudflareKvStore } from "~/services/kv-store";
+import { UserService } from "~/services/user";
 import type { Env } from "../../lib/env";
 
 export const discordRouter = new Hono<{
   Bindings: Env;
 }>();
 
-const redirectUrl = `${"https://parody-elasticbottle-apiscript.winstonyeo99.workers.dev"}/login/discord/callback`;
-
 discordRouter
   .get("/", effectValidator("query", OauthInputSchema), async (c) => {
-    const getAuthorizationUrl = (redirectUrl: string, publicKey: string) => {
+    const getAuthorizationUrl = (
+      redirectUrl: string,
+      incomingReqUrl: string,
+      publicKey: ApiKey.IPublicKey,
+    ) => {
       return Effect.gen(function* () {
-        const kvStore = (yield* CloudflareKvStore).forSchema(OauthStateSchema);
-        const stateGenerator = yield* OauthStateGenerator;
-        const discord = yield* DiscordProvider.config(redirectUrl);
+        yield* Effect.log("incomingReqUrl", incomingReqUrl);
 
-        const state = yield* stateGenerator.generateState;
-        yield* kvStore.setTtl(
-          `discord-${state}`,
-          {
-            publicKey,
-            redirectUrl,
-            state,
-          },
-          15 * 60, // 15 minutes
+        // TODO: put this in a middleware
+        const apiKeyService = yield* ApiKeyService;
+        yield* apiKeyService.validatePublicKeyUsage({
+          publicKey,
+          redirectUrl: redirectUrl.endsWith("/")
+            ? redirectUrl.slice(0, -1)
+            : redirectUrl,
+          url: incomingReqUrl,
+          // TODO: pass the bundle ID here
+        });
+        const url = yield* Oauth.createNonce.pipe(
+          Effect.tap(({ codeVerifier, state }) =>
+            Effect.gen(function* () {
+              const kvStore = (yield* CloudflareKvStore).forSchema(
+                OauthStateSchema,
+              );
+              yield* kvStore.setTtl(
+                `discord-${state}`,
+                {
+                  publicKey,
+                  redirectUrl,
+                  state,
+                  codeVerifier,
+                },
+                15 * 60, // 15 minutes
+              );
+            }),
+          ),
+          Effect.flatMap((args) =>
+            Effect.gen(function* () {
+              const discordService = yield* Discord.Service;
+              return yield* discordService.createAuthorizationUrl(args);
+            }),
+          ),
         );
-
-        const url = yield* discord.createAuthorizationUrl(state);
         return url;
       });
     };
 
     const url = await Effect.runPromise(
-      getAuthorizationUrl(redirectUrl, c.req.valid("query").publicKey).pipe(
-        Effect.provide(SqliteDrizzle.layer),
-        Effect.provide(
-          LibsqlClient.layer({
-            url: Config.string("TURSO_DATABASE_URL"),
-            authToken: Config.string("TURSO_AUTH_TOKEN"),
-          }),
-        ),
-        Effect.provide(CloudflareKvStore.withTtlLayerLive),
-        Effect.provide(OauthStateGenerator.nodeLive),
+      getAuthorizationUrl(
+        c.req.valid("query").redirectUrl,
+        c.req.header("Origin") ?? c.req.header("Referer") ?? "",
+        c.req.valid("query").publicKey,
+      ).pipe(
+        Effect.scoped,
+        Effect.provide(Discord.layer),
+        Effect.provide(ApiKeyService.layer),
+        Effect.provide(CloudflareKvStore.ttlLayer),
+        Effect.provide(Oauth.Random.nodeLayer),
         Effect.provide(
           Layer.setConfigProvider(
             ConfigProvider.fromMap(new Map(Object.entries(c.env)), {
@@ -77,7 +101,6 @@ discordRouter
         result: Schema.Schema.Type<typeof DiscordOauthCallbackSchema>,
       ) =>
         Effect.gen(function* () {
-          const discord = yield* DiscordProvider.config(redirectUrl);
           if (result.status === "error") {
             return yield* Effect.fail({
               ...result,
@@ -88,54 +111,86 @@ discordRouter
           const kvStore = (yield* CloudflareKvStore).forSchema(
             OauthStateSchema,
           );
-
-          const oauthStateOption = yield* kvStore.get(
-            `discord-${result.state}`,
+          const oauthState = yield* kvStore.get(`discord-${result.state}`).pipe(
+            Effect.flatMap((state) =>
+              Option.match(state, {
+                onNone: () => new LoginTimeout(),
+                onSome: (state) => Effect.succeed(state),
+              }),
+            ),
           );
-
-          const oauthState = yield* Option.match(oauthStateOption, {
-            onNone: () => new LoginTimeout(),
-            onSome: (state) => Effect.succeed(state),
-          });
 
           if (oauthState.state !== result.state) {
             return yield* new InvalidState();
           }
 
+          const discord = yield* Discord.Service;
           const oAuth2Tokens = yield* discord.validateAuthorizationCode(
             result.code,
           );
           const accessToken = oAuth2Tokens.accessToken();
+          const discordUser = yield* discord.getUserDetails(accessToken);
+          yield* Effect.log("discordUser", discordUser);
+          yield* Effect.log("oAuth2Tokens.data", oAuth2Tokens.data);
+
+          const apiKeyService = yield* ApiKeyService;
+          const apiKey = yield* apiKeyService.getApiKeyByPublicKeyWithProjectId(
+            oauthState.publicKey,
+          );
+
+          const userService = yield* UserService;
+          const authAccount = yield* userService.upsertAuthAccount({
+            type: "discord",
+            user: discordUser,
+            projectId: apiKey.metadata.projectId,
+          });
+
+          // TODO: Set up the session
+
+          yield* Effect.log("authAccount", authAccount);
+
           return { result: { accessToken }, status: 200 };
         });
 
       const { result, status } = await Effect.runPromise(
         handleRedirect(c.req.valid("query")).pipe(
-          Effect.provide(
-            Layer.setConfigProvider(
-              ConfigProvider.fromMap(new Map(Object.entries(c.env)), {
-                pathDelim: "_",
-              }),
-            ),
-          ),
-          Effect.provide(CloudflareKvStore.withTtlLayerLive),
+          Effect.scoped,
+          Effect.provide(FetchHttpClient.layer),
+          Effect.provide(Discord.layer),
+          Effect.provide(ApiKeyService.layer),
+          Effect.provide(UserService.liveLayer),
+          Effect.provide(CloudflareKvStore.ttlLayer),
+
           Effect.catchTags({
             oauth_failure: (e) => {
               return Effect.succeed({ result: e, status: 400 });
             },
-            "auth.errors.InvalidState": (e) => {
+            "@cubeflair/oauth/error/InvalidState": (e) => {
               return Effect.succeed({ result: e.message, status: 400 });
             },
-            "auth.errors.LoginTimeout": (e) => {
+            "@cubeflair/oauth/error/LoginTimeout": (e) => {
               return Effect.succeed({ result: e.message, status: 400 });
             },
-            "arctic.OauthRequestInvalidResponseError": (e) => {
-              return Effect.succeed({ result: e, status: 400 });
-            },
-            "arctic.OauthRequestError": (e) => {
+            "@cubeflair/oauth/error/OauthRequestError": (e) => {
               return Effect.succeed({ result: e, status: 400 });
             },
           }),
+          Effect.catchAllDefect((e) => {
+            console.error(`Defect caught: ${e}`);
+            return Effect.die(e);
+          }),
+          Effect.provide(
+            pipe(
+              c.env,
+              Object.entries,
+              (e) => new Map(e),
+              (e) =>
+                ConfigProvider.fromMap(e, {
+                  pathDelim: "_",
+                }),
+              Layer.setConfigProvider,
+            ),
+          ),
         ),
       );
 
