@@ -8,6 +8,7 @@ import { projectTable } from "./project";
 import { teamTable } from "./team";
 import { userTable } from "./user";
 
+export type SelectAuthAccount = typeof authAccountTable.$inferSelect;
 export const AUTH_ACCOUNT_TYPE = ["regular", "2fa"] as const;
 
 export const authAccountTable = sqlitePublicTable(

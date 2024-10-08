@@ -1,3 +1,4 @@
+import { URL } from "@cloudflare/workers-types";
 import { ParseResult, Schema } from "@effect/schema";
 import { Db } from "@parody/db/client";
 import { Effect } from "effect";

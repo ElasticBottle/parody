@@ -3,13 +3,16 @@ import { integer, text } from "drizzle-orm/sqlite-core";
 import { sqlitePublicTable } from "./_table";
 import { userTable } from "./user";
 
+export type SelectSession = typeof sessionTable.$inferSelect;
+
 export const sessionTable = sqlitePublicTable("session", {
   id: integer("session_id").primaryKey({
     autoIncrement: true,
   }),
-  browser_name: text("browser_name").notNull(),
-  browser_version: text("browser_version").notNull(),
-  os_name: text("os_name").notNull(),
+  session_token_hash: text("session_token_hash"),
+  browser_name: text("browser_name"),
+  browser_version: text("browser_version"),
+  os_name: text("os_name"),
   ip_address: text("ip_address").notNull(),
   userId: integer("user_id")
     .notNull()

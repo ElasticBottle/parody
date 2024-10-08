@@ -1,6 +1,9 @@
 import type { DiscordUser, GitHubUser } from "@cubeflair/oauth/provider";
 import { Db, type DbError } from "@parody/db/client";
-import { authAccountTable } from "@parody/db/schema/auth-account";
+import {
+  type SelectAuthAccount,
+  authAccountTable,
+} from "@parody/db/schema/auth-account";
 import { userTable } from "@parody/db/schema/user";
 import { Effect, Layer } from "effect";
 import type { Scope } from "effect/Scope";
@@ -19,7 +22,7 @@ export class UserService extends Effect.Tag("@cubeflair/user-service")<
             user: GitHubUser;
           }
       ),
-    ) => Effect.Effect<void, DbError, Scope>;
+    ) => Effect.Effect<SelectAuthAccount, DbError, Scope>;
   }
 >() {
   static liveLayer = Layer.succeed(this, {

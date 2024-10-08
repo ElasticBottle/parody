@@ -1,0 +1,10 @@
+version: '3'
+services:
+  otel-lgtm:
+    image: grafana/otel-lgtm
+    ports:
+      - "3333:3000"
+      - "4317:4317"
+      - "4318:4318"
+    stdin_open: true 
+    tty: true        

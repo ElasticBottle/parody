@@ -1,9 +1,4 @@
-import {
-  Link,
-  Outlet,
-  createFileRoute,
-  redirect,
-} from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { store } from "~/store";
 
 export const Route = createFileRoute("/dashboard")({
@@ -13,14 +8,14 @@ export const Route = createFileRoute("/dashboard")({
   beforeLoad: ({ location }) => {
     const { user } = store.getSnapshot().context;
     // If the user is logged out, redirect them to the login page
-    if (user.status === "loggedOut") {
-      throw redirect({
-        to: "/login",
-        search: {
-          redirect: location.href,
-        },
-      });
-    }
+    // if (user.status === "loggedOut") {
+    //   throw redirect({
+    //     to: "/login",
+    //     search: {
+    //       redirect: location.href,
+    //     },
+    //   });
+    // }
 
     // Otherwise, return the user in context
     return {

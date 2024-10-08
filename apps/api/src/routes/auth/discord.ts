@@ -5,7 +5,8 @@ import { FetchHttpClient } from "@effect/platform";
 import type { Schema } from "@effect/schema";
 import { effectValidator } from "@hono/effect-validator";
 import { ConfigProvider, Effect, Layer, Option, pipe } from "effect";
-import { Hono } from "hono";
+import { type Env, Hono } from "hono";
+import { getConnInfo } from "hono/cloudflare-workers";
 import {
   DiscordOauthCallbackSchema,
   OauthInputSchema,
@@ -13,8 +14,8 @@ import {
 } from "~/lib/auth/schema";
 import { type ApiKey, ApiKeyService } from "~/services/api-key";
 import { CloudflareKvStore } from "~/services/kv-store";
+import { SessionService } from "~/services/session";
 import { UserService } from "~/services/user";
-import type { Env } from "../../lib/env";
 
 export const discordRouter = new Hono<{
   Bindings: Env;
@@ -75,16 +76,22 @@ discordRouter
         c.req.header("Origin") ?? c.req.header("Referer") ?? "",
         c.req.valid("query").publicKey,
       ).pipe(
+        Effect.withSpan("discord/authorize"),
         Effect.scoped,
         Effect.provide(Discord.layer),
         Effect.provide(ApiKeyService.layer),
         Effect.provide(CloudflareKvStore.ttlLayer),
         Effect.provide(Oauth.Random.nodeLayer),
         Effect.provide(
-          Layer.setConfigProvider(
-            ConfigProvider.fromMap(new Map(Object.entries(c.env)), {
-              pathDelim: "_",
-            }),
+          pipe(
+            c.env,
+            Object.entries,
+            (e) => new Map(e),
+            (e) =>
+              ConfigProvider.fromMap(e, {
+                pathDelim: "_",
+              }),
+            Layer.setConfigProvider,
           ),
         ),
       ),
@@ -99,8 +106,13 @@ discordRouter
     async (c) => {
       const handleRedirect = (
         result: Schema.Schema.Type<typeof DiscordOauthCallbackSchema>,
+        userAgent?: string,
       ) =>
         Effect.gen(function* () {
+          console.log("getConnInfo(c)");
+          const connectionInfo = yield* Effect.sync(() => getConnInfo(c));
+          yield* Effect.log("connectionInfo", connectionInfo);
+
           if (result.status === "error") {
             return yield* Effect.fail({
               ...result,
@@ -144,23 +156,29 @@ discordRouter
             user: discordUser,
             projectId: apiKey.metadata.projectId,
           });
+          yield* Effect.log("authAccount", authAccount);
 
           // TODO: Set up the session
-
-          yield* Effect.log("authAccount", authAccount);
+          const sessionService = yield* SessionService;
+          const session = yield* sessionService.createSession(
+            authAccount.userId,
+            userAgent,
+          );
+          yield* Effect.log("session", session);
 
           return { result: { accessToken }, status: 200 };
         });
 
       const { result, status } = await Effect.runPromise(
-        handleRedirect(c.req.valid("query")).pipe(
+        handleRedirect(c.req.valid("query"), c.req.header("User-Agent")).pipe(
+          Effect.withSpan("discord/callback"),
           Effect.scoped,
           Effect.provide(FetchHttpClient.layer),
           Effect.provide(Discord.layer),
+          Effect.provide(SessionService.layer),
           Effect.provide(ApiKeyService.layer),
           Effect.provide(UserService.liveLayer),
           Effect.provide(CloudflareKvStore.ttlLayer),
-
           Effect.catchTags({
             oauth_failure: (e) => {
               return Effect.succeed({ result: e, status: 400 });
