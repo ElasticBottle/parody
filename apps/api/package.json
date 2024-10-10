@@ -15,10 +15,11 @@
   "dependencies": {
     "@cubeflair/oauth": "workspace:*",
     "@effect/opentelemetry": "^0.38.1",
-    "@effect/platform": "^0.67.1",
+    "@effect/platform": "^0.68.1",
     "@effect/schema": "^0.74.1",
     "@hono/effect-validator": "^1.0.1",
     "@microlabs/otel-cf-workers": "^1.0.0-rc.48",
+    "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/sdk-trace-base": "^1.26.0",
     "@opentelemetry/sdk-trace-web": "^1.26.0",
     "@parody/db": "workspace:*",
