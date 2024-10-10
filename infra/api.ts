@@ -12,12 +12,6 @@ export const api = new sst.cloudflare.Worker("Api", {
     ...process.env,
     BASE_URL: $interpolate`${domain}`,
   }),
-  transform: {
-    worker: (worker) => {
-      worker.compatibilityDate = "2024-09-23";
-      worker.compatibilityFlags = ["nodejs_compat_v2"];
-    },
-  },
 });
 
 export const outputs = {
