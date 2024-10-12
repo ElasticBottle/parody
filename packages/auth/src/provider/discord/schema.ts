@@ -70,9 +70,6 @@ export class DiscordUserResponse extends Schema.Class<DiscordUserResponse>(
   }),
 }) {}
 
-export const decodeDiscordUserResponseFromUnknown =
-  Schema.decodeUnknown(DiscordUserResponse);
-
 export class DiscordUser extends BaseUser.extend<DiscordUser>("DiscordUser")({
   _tag: Tag$("DiscordUser"),
 

@@ -51,7 +51,7 @@ export const validateAuthorizationCode = (
     },
   }).pipe(
     Effect.withSpan(
-      `@cubeflair/oauth/validateAuthorizationCode/${providerName}`,
+      `@cubeflair/auth/validateAuthorizationCode/${providerName}`,
     ),
   );
 };

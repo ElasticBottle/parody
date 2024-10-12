@@ -1,5 +1,5 @@
 {
-  "name": "@cubeflair/oauth",
+  "name": "@cubeflair/auth",
   "private": true,
   "type": "module",
   "exports": {
@@ -14,10 +14,6 @@
     "./provider": {
       "types": "./dist/provider/index.d.ts",
       "default": "./src/provider/index.ts"
-    },
-    "./oauth": {
-      "types": "./dist/oauth/index.d.ts",
-      "default": "./src/oauth/index.ts"
     }
   },
   "scripts": {
@@ -29,8 +25,8 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "@effect/platform": "^0.68.1",
-    "@effect/schema": "^0.74.1",
+    "@effect/platform": "^0.68.2",
+    "@effect/schema": "^0.75.3",
     "effect": "^3.9.1"
   },
   "devDependencies": {

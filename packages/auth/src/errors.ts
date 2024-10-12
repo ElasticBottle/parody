@@ -1,36 +1,22 @@
 import { Schema } from "@effect/schema";
 import type { UnknownException } from "effect/Cause";
 
-export class GenerateStateError extends Schema.TaggedError<GenerateStateError>()(
-  "GenerateStateError",
-  {
-    message: Schema.String,
-  },
-) {}
-
-export class GenerateCodeVerifierError extends Schema.TaggedError<GenerateCodeVerifierError>()(
-  "GenerateCodeVerifierError",
-  {
-    message: Schema.String,
-  },
-) {}
-
 export class NetworkError extends Schema.TaggedError<NetworkError>()(
-  "@cubeflair/oauth/error/NetworkError",
+  "@cubeflair/auth/error/NetworkError",
   {
     cause: Schema.instanceOf(Error),
   },
 ) {}
 
 export class InvalidResponseError extends Schema.TaggedError<InvalidResponseError>()(
-  "@cubeflair/oauth/error/InvalidResponseError",
+  "@cubeflair/auth/error/InvalidResponseError",
   {
     cause: Schema.instanceOf(Error),
   },
 ) {}
 
 export class OauthRequestError extends Schema.TaggedError<OauthRequestError>()(
-  "@cubeflair/oauth/error/OauthRequestError",
+  "@cubeflair/auth/error/OauthRequestError",
   {
     message: Schema.String,
     name: Schema.String,
@@ -48,7 +34,7 @@ export type OauthCodeValidationError =
   | UnknownException;
 
 export class LoginTimeout extends Schema.TaggedError<LoginTimeout>()(
-  "@cubeflair/oauth/error/LoginTimeout",
+  "@cubeflair/auth/error/LoginTimeout",
   {
     message: Schema.optionalWith(Schema.String, {
       default: () => "Login Timeout. Please try logging in again.",
@@ -57,7 +43,7 @@ export class LoginTimeout extends Schema.TaggedError<LoginTimeout>()(
 ) {}
 
 export class InvalidState extends Schema.TaggedError<InvalidState>()(
-  "@cubeflair/oauth/error/InvalidState",
+  "@cubeflair/auth/error/InvalidState",
   {
     message: Schema.optionalWith(Schema.String, {
       default: () => "Invalid state, please try to login again.",

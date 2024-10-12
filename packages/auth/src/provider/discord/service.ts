@@ -1,10 +1,15 @@
-import { HttpClient } from "@effect/platform";
+import {
+  FetchHttpClient,
+  HttpClient,
+  HttpClientRequest,
+  HttpClientResponse,
+} from "@effect/platform";
 import { Discord } from "arctic";
 import { Config, Effect, Layer, Redacted } from "effect";
 import { validateAuthorizationCode } from "../../arctic/code-validation";
 import { makeRedirectUrl } from "../../oauth/make-redirect-url";
 import type { OauthService } from "../../oauth/service-interface";
-import { DiscordUser, decodeDiscordUserResponseFromUnknown } from "./schema";
+import { DiscordUser, DiscordUserResponse } from "./schema";
 
 const discordProvider = Config.map(
   Config.all([
@@ -29,7 +34,7 @@ const discordProvider = Config.map(
   },
 );
 
-export class Service extends Effect.Tag("@cubeflair/oauth/discord-service")<
+export class Service extends Effect.Tag("@cubeflair/auth/discord-service")<
   Service,
   OauthService<DiscordUser>
 >() {}
@@ -40,8 +45,10 @@ export const layer = Layer.effect(
     const provider = yield* discordProvider;
     return {
       createAuthorizationUrl: ({ state, scopes = ["identify", "email"] }) =>
-        Effect.succeed(provider.createAuthorizationURL(state, scopes)),
-      validateAuthorizationCode(code) {
+        Effect.succeed(provider.createAuthorizationURL(state, scopes)).pipe(
+          Effect.withSpan("@cubeflair/discord-service/createAuthorizationUrl"),
+        ),
+      validateAuthorizationCode: (code) => {
         return validateAuthorizationCode(
           () => provider.validateAuthorizationCode(code),
           "discord",
@@ -49,19 +56,20 @@ export const layer = Layer.effect(
       },
       getUserDetails: (accessToken: string) =>
         Effect.gen(function* () {
-          const client = yield* HttpClient.HttpClient;
-          const response = yield* client.get(
-            "https://discord.com/api/v10/users/@me",
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            },
+          const client = (yield* HttpClient.HttpClient).pipe(
+            HttpClient.filterStatusOk,
           );
+          const req = HttpClientRequest.get(
+            "https://discord.com/api/v10/users/@me",
+          ).pipe(HttpClientRequest.bearerToken(accessToken));
 
-          const json = yield* response.json;
+          const response = yield* client.execute(req);
+
           const discordUserResponse =
-            yield* decodeDiscordUserResponseFromUnknown(json);
+            yield* HttpClientResponse.schemaBodyJson(DiscordUserResponse)(
+              response,
+            );
+
           return new DiscordUser({
             id: discordUserResponse.id,
             username: discordUserResponse.username,
@@ -74,7 +82,11 @@ export const layer = Layer.effect(
             system: discordUserResponse.system,
             bot: discordUserResponse.bot,
           });
-        }).pipe(Effect.withSpan("@cubeflair/discord-service/getUserDetails")),
+        }).pipe(
+          Effect.scoped,
+          Effect.provide(FetchHttpClient.layer),
+          Effect.withSpan("@cubeflair/discord-service/getUserDetails"),
+        ),
     };
   }),
 );

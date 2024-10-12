@@ -29,7 +29,7 @@ const githubProvider = Config.map(
   },
 );
 
-export class Service extends Effect.Tag("@cubeflair/oauth/github-service")<
+export class Service extends Effect.Tag("@cubeflair/auth/github-service")<
   Service,
   OauthService<GitHubUser>
 >() {}
