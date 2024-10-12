@@ -1,33 +1,31 @@
 import { relations } from "drizzle-orm";
 import { index, integer, text } from "drizzle-orm/sqlite-core";
 import { sqlitePublicTable } from "./_table";
-import { authAccountTable } from "./auth-account";
 import { projectTable } from "./project";
 import { sessionTable } from "./session";
+import { userToAuthAccountTable } from "./user-to-auth-account";
 
 export const userTable = sqlitePublicTable(
   "user",
   {
     id: integer("user_id").primaryKey({ autoIncrement: true }),
-    projectId: integer("project_id")
+    projectId: integer()
       .notNull()
       .references(() => projectTable.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    username: text("username"),
-    firstName: text("first_name"),
-    lastName: text("last_name"),
-    additional_info: text("additional_info", { mode: "json" }).$type<
-      Record<string, string | number | boolean>
-    >(),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    username: text(),
+    firstName: text(),
+    lastName: text(),
+    additional_info: text({ mode: "json" }),
+    createdAt: integer({ mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer({ mode: "timestamp" })
       .notNull()
       .$onUpdateFn(() => new Date()),
-    deletedAt: integer("deleted_at", { mode: "timestamp" }),
+    deletedAt: integer({ mode: "timestamp" }),
   },
   (table) => {
     return {
@@ -42,7 +40,7 @@ export const userRelations = relations(userTable, ({ many, one }) => {
       fields: [userTable.projectId],
       references: [projectTable.id],
     }),
-    authAccounts: many(authAccountTable),
+    userToAuthAccount: many(userToAuthAccountTable),
     sessions: many(sessionTable),
   };
 });

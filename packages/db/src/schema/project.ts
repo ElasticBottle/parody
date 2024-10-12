@@ -1,24 +1,29 @@
 import { relations } from "drizzle-orm";
 import { index, integer, text } from "drizzle-orm/sqlite-core";
-import { sqliteAppTable } from "./_table";
+import { sqlitePublicTable } from "./_table";
 import { authAccountTable } from "./auth-account";
 import { teamTable } from "./team";
 import { userTable } from "./user";
 
-export const projectTable = sqliteAppTable(
+export const projectTable = sqlitePublicTable(
   "project",
   {
     id: integer("project_id").primaryKey({ autoIncrement: true }),
-    teamId: integer("team_id"),
-    name: text("name").notNull(),
-    description: text("description"),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    teamId: integer()
+      .notNull()
+      .references(() => teamTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text().notNull(),
+    description: text(),
+    createdAt: integer({ mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer({ mode: "timestamp" })
       .notNull()
       .$onUpdateFn(() => new Date()),
-    deletedAt: integer("deleted_at", { mode: "timestamp" }),
+    deletedAt: integer({ mode: "timestamp" }),
   },
   (table) => {
     return {

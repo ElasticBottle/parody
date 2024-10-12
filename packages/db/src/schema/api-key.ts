@@ -1,7 +1,7 @@
 import { integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { sqlitePublicTable } from "./_table";
 import { authAccountTable } from "./auth-account";
-import { teamTable } from "./team";
+import { projectTable } from "./project";
 import { userTable } from "./user";
 
 export type SelectApiKey = typeof apiKeyTable.$inferSelect;
@@ -15,51 +15,44 @@ export const apiKeyTable = sqlitePublicTable(
     id: integer("api_key_id").primaryKey({
       autoIncrement: true,
     }),
-    teamId: integer("team_id").references(() => teamTable.id, {
+    projectId: integer().references(() => projectTable.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
-    authAccountId: integer("auth_account_id")
+    authAccountId: integer()
       .notNull()
       .references(() => authAccountTable.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    userId: integer("user_id")
+    userId: integer()
       .notNull()
       .references(() => userTable.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    name: text("name").notNull(),
-    description: text("description"),
-    allowedDomains: text("allowed_domains", { mode: "json" })
-      .notNull()
-      .$type<Array<string>>(),
-    allowedBundleIdentifiers: text("allowed_bundle_identifiers", {
+    name: text().notNull(),
+    description: text(),
+    allowedDomains: text({ mode: "json" }).notNull().$type<Array<string>>(),
+    allowedBundleIdentifiers: text({
       mode: "json",
     })
       .notNull()
       .$type<Array<string>>(),
-    allowedRedirectUrls: text("allowed_redirect_urls", { mode: "json" })
+    allowedRedirectUrls: text({ mode: "json" })
       .notNull()
       .$type<Array<string>>(),
-    metadata: text("metadata", { mode: "json" }).$type<
-      Record<string, string | number | boolean> | { projectId: number }
-    >(),
-    publicKey: text("public_key")
-      .unique()
-      .notNull()
-      .$type<`public_key_${string}`>(),
-    hashedPrivateKey: text("hashed_private_key").unique().notNull(),
-    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    metadata: text({ mode: "json" }),
+    publicKey: text().unique().notNull().$type<`public_key_${string}`>(),
+    hashedPrivateKey: text().unique().notNull(),
+    expiresAt: integer({ mode: "timestamp" }).notNull(),
+    createdAt: integer({ mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: integer({ mode: "timestamp" })
       .notNull()
       .$onUpdateFn(() => new Date()),
-    deletedAt: integer("deleted_at", { mode: "timestamp" }),
+    deletedAt: integer({ mode: "timestamp" }),
   },
   (table) => {
     return {
@@ -67,7 +60,6 @@ export const apiKeyTable = sqlitePublicTable(
         table.hashedPrivateKey,
       ),
       publicKeyIdx: uniqueIndex("api_key_public_key_idx").on(table.publicKey),
-      privateKeyIdx: uniqueIndex("api_key_public_key_idx").on(table.publicKey),
     };
   },
 );

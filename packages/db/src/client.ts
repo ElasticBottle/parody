@@ -66,6 +66,7 @@ const acquireDb = Effect.gen(function* () {
     try: () =>
       drizzle(client, {
         schema,
+        casing: "snake_case",
       }),
     catch: (e) =>
       new DbAcquisitionError({

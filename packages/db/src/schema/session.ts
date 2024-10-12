@@ -9,25 +9,25 @@ export const sessionTable = sqlitePublicTable("session", {
   id: integer("session_id").primaryKey({
     autoIncrement: true,
   }),
-  session_token_hash: text("session_token_hash"),
-  browser_name: text("browser_name"),
-  browser_version: text("browser_version"),
-  os_name: text("os_name"),
-  ip_address: text("ip_address").notNull(),
-  userId: integer("user_id")
+  session_token_hash: text(),
+  browser_name: text(),
+  browser_version: text(),
+  os_name: text(),
+  ip_address: text().notNull(),
+  userId: integer()
     .notNull()
     .references(() => userTable.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
-  expires_at: integer("expires_at", { mode: "timestamp" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  expires_at: integer({ mode: "timestamp" }).notNull(),
+  createdAt: integer({ mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: integer({ mode: "timestamp" })
     .notNull()
     .$onUpdateFn(() => new Date()),
-  deletedAt: integer("deleted_at", { mode: "timestamp" }),
+  deletedAt: integer({ mode: "timestamp" }),
 });
 
 export const sessionRelations = relations(sessionTable, ({ one }) => {

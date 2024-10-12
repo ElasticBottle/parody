@@ -2,20 +2,20 @@ import { relations } from "drizzle-orm";
 import { integer, primaryKey } from "drizzle-orm/sqlite-core";
 import { sqlitePublicTable } from "./_table";
 import { authAccountTable } from "./auth-account";
-import { teamRoleTable } from "./team-role";
+import { userTable } from "./user";
 
-export const authAccountTeamRoleTable = sqlitePublicTable(
-  "auth_account_team_role",
+export const userToAuthAccountTable = sqlitePublicTable(
+  "user_to_auth_account",
   {
-    auth_account_id: integer()
+    userId: integer()
       .notNull()
-      .references(() => authAccountTable.id, {
+      .references(() => userTable.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    team_role_id: integer()
+    authAccountId: integer()
       .notNull()
-      .references(() => teamRoleTable.id, {
+      .references(() => authAccountTable.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
@@ -27,23 +27,23 @@ export const authAccountTeamRoleTable = sqlitePublicTable(
   (table) => {
     return {
       primaryKey: primaryKey({
-        columns: [table.auth_account_id, table.team_role_id],
+        columns: [table.userId, table.authAccountId],
       }),
     };
   },
 );
 
-export const authAccountTeamRoleRelations = relations(
-  authAccountTeamRoleTable,
+export const userToAuthAccountRelations = relations(
+  userToAuthAccountTable,
   ({ one }) => {
     return {
-      authAccount: one(authAccountTable, {
-        fields: [authAccountTeamRoleTable.auth_account_id],
-        references: [authAccountTable.id],
+      user: one(userTable, {
+        fields: [userToAuthAccountTable.userId],
+        references: [userTable.id],
       }),
-      teamRole: one(teamRoleTable, {
-        fields: [authAccountTeamRoleTable.team_role_id],
-        references: [teamRoleTable.id],
+      authAccount: one(authAccountTable, {
+        fields: [userToAuthAccountTable.authAccountId],
+        references: [authAccountTable.id],
       }),
     };
   },

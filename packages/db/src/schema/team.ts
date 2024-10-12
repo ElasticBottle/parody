@@ -6,25 +6,20 @@ import { teamRoleTable } from "./team-role";
 
 export const teamTable = sqlitePublicTable("team", {
   id: integer("team_id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  description: text("description"),
-  projectId: integer("project_id")
-    .notNull()
-    .references(() => projectTable.id, {
-      onDelete: "cascade",
-      onUpdate: "cascade",
-    }),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  name: text().notNull(),
+  description: text(),
+  createdAt: integer({ mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: integer({ mode: "timestamp" })
     .notNull()
     .$onUpdateFn(() => new Date()),
-  deletedAt: integer("deleted_at", { mode: "timestamp" }),
+  deletedAt: integer({ mode: "timestamp" }),
 });
 
 export const teamRelations = relations(teamTable, ({ many }) => {
   return {
     teamRoles: many(teamRoleTable),
+    projects: many(projectTable),
   };
 });

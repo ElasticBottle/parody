@@ -32,8 +32,8 @@
     "with-env": "dotenvx run -f ../../.env -- "
   },
   "dependencies": {
-    "@cubeflair/oauth": "workspace:*",
-    "@effect/schema": "^0.74.1",
+    "@cubeflair/auth": "workspace:*",
+    "@effect/schema": "^0.75.3",
     "@libsql/client": "^0.14.0",
     "drizzle-orm": "^0.34.1",
     "effect": "^3.9.1"
