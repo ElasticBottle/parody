@@ -82,4 +82,7 @@ tailwind.css
 # sst
 .sst
 sst-env.d.ts
+
+# AI autocomplete
 .aider*
+.cursorrules
