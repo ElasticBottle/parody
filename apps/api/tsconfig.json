@@ -1,5 +1,5 @@
 {
-  "extends": "@parody/typescript/tsconfig.base.json",
+  "extends": "@rectangular-labs/typescript/tsconfig.base.json",
   "compilerOptions": {
     "target": "ESNext",
     "lib": ["ESNext"],
@@ -7,7 +7,7 @@
     "types": ["@cloudflare/workers-types/2023-07-01"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    
+
     "baseUrl": ".",
     "paths": {
       "~/*": ["src/*"]

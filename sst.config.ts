@@ -1,23 +1,22 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 import { readdirSync } from "node:fs";
+
 export default $config({
   app(input) {
-    // let deployProfile: string | undefined = "parody-dev";
-    // if (input.stage === "production") {
-    //   deployProfile = "parody-production";
-    // } else if (process.env.GITHUB_ACTIONS) {
-    //   deployProfile = undefined;
-    // }
+    let deployProfile = "rectangular-labs-dev";
+    if (input.stage === "production") {
+      deployProfile = "rectangular-labs-production";
+    }
 
     return {
-      name: "parody",
+      name: "rectangular-labs",
       removal: input?.stage === "production" ? "retain" : "remove",
       home: "cloudflare",
       providers: {
-        // aws: {
-        // 	region: "us-west-2",
-        // 	...(deployProfile ? { profile: deployProfile } : {}),
-        // },
+        aws: {
+          region: "us-west-2",
+          profile: deployProfile,
+        },
         "pulumi-stripe": true,
         cloudflare: true,
       },

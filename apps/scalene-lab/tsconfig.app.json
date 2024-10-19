@@ -1,5 +1,5 @@
 {
-  "extends": "@parody/typescript/tsconfig.base.json",
+  "extends": "@rectangular-labs/typescript/tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,

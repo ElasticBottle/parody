@@ -1,10 +1,10 @@
-import type { DiscordUser, GitHubUser } from "@cubeflair/oauth/provider";
-import { Db, type DbError } from "@parody/db/client";
+import type { DiscordUser, GitHubUser } from "@cubeflair/auth/provider";
+import { Db, type DbError } from "@rectangular-labs/db/client";
 import {
   type SelectAuthAccount,
   authAccountTable,
-} from "@parody/db/schema/auth-account";
-import { userTable } from "@parody/db/schema/user";
+} from "@rectangular-labs/db/schema/auth-account";
+import { userTable } from "@rectangular-labs/db/schema/user";
 import { Effect, Layer } from "effect";
 import type { Scope } from "effect/Scope";
 
@@ -25,7 +25,7 @@ export class UserService extends Effect.Tag("@cubeflair/user-service")<
     ) => Effect.Effect<SelectAuthAccount, DbError, Scope>;
   }
 >() {
-  static liveLayer = Layer.succeed(this, {
+  static layer = Layer.succeed(this, {
     upsertAuthAccount: (args) =>
       Effect.gen(function* () {
         const { db } = yield* Db;

@@ -1,7 +1,5 @@
 {
-  "name": "@parody/typescript",
+  "name": "@rectangular-labs/typescript",
   "private": true,
-  "files": [
-    "*.json"
-  ]
+  "files": ["*.json"]
 }

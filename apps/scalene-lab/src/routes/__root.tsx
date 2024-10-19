@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { Spinner } from "../components/Spinner";
-import "@parody/ui/globals.css";
+import "@rectangular-labs/ui/globals.css";
 
 function RouterSpinner() {
   const isLoading = useRouterState({ select: (s) => s.status === "pending" });

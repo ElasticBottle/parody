@@ -26,7 +26,7 @@ interface ICloudflareKvStoreSchema<A, R>
 }
 
 export class CloudflareKvStore extends Effect.Tag(
-  "@cubeflair/cloudflare-kv-store-service",
+  "@cubeflair/services/cloudflare-kv-store",
 )<CloudflareKvStore, ICloudflareKvStore>() {
   static keyValueStoreLayer = Layer.succeed(
     KeyValueStore.KeyValueStore,
@@ -160,7 +160,9 @@ export class CloudflareKvStore extends Effect.Tag(
       return {
         ...kvStore,
         setTtl,
-        forSchema: <A, I, R>(schema: Schema.Schema<A, I, R>) => {
+        forSchema: <A, I, R>(
+          schema: Schema.Schema<A, I, R>,
+        ): ICloudflareKvStoreSchema<A, R> => {
           const jsonSchema = Schema.parseJson(schema);
           const schemaStore = kvStore.forSchema(schema);
           const encode = Schema.encode(jsonSchema);

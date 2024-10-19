@@ -1,5 +1,5 @@
 import { ParseResult, Schema } from "@effect/schema";
-import { Db } from "@parody/db/client";
+import { Db } from "@rectangular-labs/db/client";
 import { Effect } from "effect";
 import { type IPublicKey, PublicKeySchema, encodePublicKey } from "./keys";
 

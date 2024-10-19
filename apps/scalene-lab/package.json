@@ -1,5 +1,5 @@
 {
-  "name": "@parody/www",
+  "name": "@rectangular-labs/www",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@effect/schema": "^0.75.3",
-    "@parody/ui": "workspace:*",
+    "@rectangular-labs/ui": "workspace:*",
     "@tanstack/react-query": "^5.56.2",
     "@tanstack/react-query-devtools": "^5.56.2",
     "@tanstack/react-router": "^1.58.15",

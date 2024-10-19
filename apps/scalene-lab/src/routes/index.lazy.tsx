@@ -1,5 +1,5 @@
-import { Button } from "@parody/ui/button";
-import DotPattern from "@parody/ui/dot-pattern";
+import { Button } from "@rectangular-labs/ui/button";
+import DotPattern from "@rectangular-labs/ui/dot-pattern";
 import { Link, createLazyFileRoute } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/")({

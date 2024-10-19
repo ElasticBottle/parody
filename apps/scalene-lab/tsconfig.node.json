@@ -1,5 +1,5 @@
 {
-  "extends": "@parody/typescript/tsconfig.base.json",
+  "extends": "@rectangular-labs/typescript/tsconfig.base.json",
   "compilerOptions": {
     "module": "ESNext",
     /* Bundler mode */

@@ -1,5 +1,5 @@
-import { Db, DbUsageError } from "@parody/db/client";
-import type { SelectApiKeyWithProjectId } from "@parody/db/schema/api-key";
+import { Db, DbUsageError } from "@rectangular-labs/db/client";
+import type { SelectApiKeyWithProjectId } from "@rectangular-labs/db/schema/api-key";
 import { Effect } from "effect";
 import { type IPublicKey, encodePublicKey } from "./keys";
 

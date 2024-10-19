@@ -2,8 +2,11 @@ import {
   Db,
   type DbAcquisitionError,
   type DbUsageError,
-} from "@parody/db/client";
-import { type SelectSession, sessionTable } from "@parody/db/schema/session";
+} from "@rectangular-labs/db/client";
+import {
+  type SelectSession,
+  sessionTable,
+} from "@rectangular-labs/db/schema/session";
 import { Effect, Layer } from "effect";
 import type { ConfigError } from "effect/ConfigError";
 import type { Scope } from "effect/Scope";

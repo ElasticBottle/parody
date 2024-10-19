@@ -1,6 +1,5 @@
-import { InvalidState, LoginTimeout } from "@cubeflair/oauth/errors";
-import { Oauth } from "@cubeflair/oauth/oauth";
-import { Discord } from "@cubeflair/oauth/provider";
+import { InvalidState, LoginTimeout } from "@cubeflair/auth/errors";
+import { Discord } from "@cubeflair/auth/provider";
 import * as Resource from "@effect/opentelemetry/Resource";
 import * as Tracer from "@effect/opentelemetry/Tracer";
 import { FetchHttpClient } from "@effect/platform";
@@ -8,33 +7,35 @@ import type { Schema } from "@effect/schema";
 import { effectValidator } from "@hono/effect-validator";
 import { trace } from "@opentelemetry/api";
 import { ConfigProvider, Effect, Layer, Option, pipe } from "effect";
-import { type Env, Hono } from "hono";
+import { Hono } from "hono";
 import { getConnInfo } from "hono/cloudflare-workers";
 import {
   DiscordOauthCallbackSchema,
   OauthInputSchema,
   OauthStateSchema,
 } from "~/lib/auth/schema";
+import { liveRuntime } from "~/lib/effect/runtime";
+import type { Env } from "~/lib/env";
 import { type ApiKey, ApiKeyService } from "~/services/api-key";
 import { CloudflareKvStore } from "~/services/kv-store";
+import { createOauthNonce } from "~/services/random-value";
 import { SessionService } from "~/services/session";
 import { UserService } from "~/services/user";
 
 export const discordRouter = new Hono<{
   Bindings: Env;
 }>();
-
 discordRouter
   .get("/", effectValidator("query", OauthInputSchema), async (c) => {
+    const headers = c.req.header();
+    console.log("headers", headers);
     const getAuthorizationUrl = (
       redirectUrl: string,
       incomingReqUrl: string,
       publicKey: ApiKey.IPublicKey,
     ) => {
       return Effect.gen(function* () {
-        yield* Effect.log("incomingReqUrl", incomingReqUrl).pipe(
-          Effect.withSpan("testing"),
-        );
+        yield* Effect.log({ incomingReqUrl: { test: "helo world" } });
 
         // TODO: put this in a middleware
         const apiKeyService = yield* ApiKeyService;
@@ -46,7 +47,7 @@ discordRouter
           url: incomingReqUrl,
           // TODO: pass the bundle ID here
         });
-        const url = yield* Oauth.createNonce.pipe(
+        const url = yield* createOauthNonce.pipe(
           Effect.tap(({ codeVerifier, state }) =>
             Effect.gen(function* () {
               const kvStore = (yield* CloudflareKvStore).forSchema(
@@ -72,8 +73,12 @@ discordRouter
           ),
         );
         return url;
-      });
+      }).pipe(
+        Effect.annotateLogs({ log1: "value1" }),
+        Effect.withSpan("discord/create-authorization-url"),
+      );
     };
+
     const span = trace.getActiveSpan();
     span?.updateName("discord/authorize");
     const spanContext = span?.spanContext();
@@ -81,37 +86,21 @@ discordRouter
     const TracingLive = Tracer.layerGlobal.pipe(
       Layer.provide(Resource.layer({ serviceName: "auth-layer" })),
     );
-    const url = await Effect.runPromise(
+    const url = await liveRuntime(c.env).runPromise(
       getAuthorizationUrl(
         c.req.valid("query").redirectUrl,
         c.req.header("Origin") ?? c.req.header("Referer") ?? "",
         c.req.valid("query").publicKey,
       ).pipe(
+        Effect.scoped,
         Effect.provide(TracingLive),
         spanContext
           ? Tracer.withSpanContext(spanContext)
           : Effect.withSpan("orphaned"),
-        Effect.scoped,
-        Effect.provide(Discord.layer),
-        Effect.provide(ApiKeyService.layer),
-        Effect.provide(CloudflareKvStore.ttlLayer),
-        Effect.provide(Oauth.Random.nodeLayer),
         Effect.catchAllDefect((e) => {
           console.error(`Defect caught: ${e}`);
           return Effect.die(e);
         }),
-        Effect.provide(
-          pipe(
-            c.env,
-            Object.entries,
-            (e) => new Map(e),
-            (e) =>
-              ConfigProvider.fromMap(e, {
-                pathDelim: "_",
-              }),
-            Layer.setConfigProvider,
-          ),
-        ),
       ),
     );
 
@@ -193,20 +182,20 @@ discordRouter
           Effect.provide(Discord.layer),
           Effect.provide(SessionService.layer),
           Effect.provide(ApiKeyService.layer),
-          Effect.provide(UserService.liveLayer),
+          Effect.provide(UserService.layer),
           Effect.provide(CloudflareKvStore.ttlLayer),
           Effect.provide(FetchHttpClient.layer),
           Effect.catchTags({
             oauth_failure: (e) => {
               return Effect.succeed({ result: e, status: 400 });
             },
-            "@cubeflair/oauth/error/InvalidState": (e) => {
+            "@cubeflair/auth/error/InvalidState": (e) => {
               return Effect.succeed({ result: e.message, status: 400 });
             },
-            "@cubeflair/oauth/error/LoginTimeout": (e) => {
+            "@cubeflair/auth/error/LoginTimeout": (e) => {
               return Effect.succeed({ result: e.message, status: 400 });
             },
-            "@cubeflair/oauth/error/OauthRequestError": (e) => {
+            "@cubeflair/auth/error/OauthRequestError": (e) => {
               return Effect.succeed({ result: e, status: 400 });
             },
           }),
